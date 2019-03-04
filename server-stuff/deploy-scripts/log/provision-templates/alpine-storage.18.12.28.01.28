@@ -1,0 +1,10 @@
+config: {}
+description: ""
+devices:
+  root:
+    path: /
+    pool: lxd
+    type: disk
+name: alpine-storage
+used_by:
+- /1.0/containers/alpine-storage

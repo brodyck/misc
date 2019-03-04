@@ -1,0 +1,9 @@
+
+1;4804;0c#! /bin/bash
+set -x
+mkdir $1
+tar xf $1.tar_1.bz2 -C $1
+cd $1
+ mv ./*/* . 
+./install.sh && wait
+exit

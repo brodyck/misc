@@ -1,0 +1,29 @@
+# /bin/bash
+
+install="dnf install -y"
+
+#script to install ranger from git
+ranger-git
+
+#dnf -y install dnf-plugins-core
+#dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+dnf -y install libvirt git iperf htop emacs-nox bridge-utils snapd #zfs
+firewall-cmd --add-service=samba --permanent
+firewall-cmd --reload
+setsebool samba_export_all_rw on
+setsebool samba_export_all_ro on
+setsebool samba_share_fusefs on
+setsebool samba_share_nfs on
+setsebool allow_smbd_anon_write on
+setsebool samba_create_home_dirs on
+setsebool samba_enable_home_dirs on
+
+#lxc/d stuff
+setenforce permissive
+dnf update -y && dnf upgrade -y && dnf install snapd python3-pip
+snap install lxd
+snap enable lxd
+snap services lxd 
+pip3 install ansible
+
+curl -L https://raw.githubusercontent.com/lxdock/lxdock/$(lxdock --version | cut -d ' ' -f 2)/contrib/completion/bash/lxdock -o /etc/bash_completion.d/lxdock

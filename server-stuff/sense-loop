@@ -1,0 +1,2 @@
+#!/bin/bash
+while :; do sensors | grep -e Core -e temp1; sleep 1 && clear; done

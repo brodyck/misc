@@ -1,0 +1,11 @@
+#! /bin/bash
+provcont=/root/deploy-scripts/provision-cont
+source /root/deploy-scripts/provision-templates/${1}
+set -x
+i=0
+while [[ $NODES -gt $i ]]
+do
+    $provcont start ${1}
+    
+    i=$(( i + 1 ))
+done

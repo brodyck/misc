@@ -1,0 +1,41 @@
+#! /bin/sh
+# check which bedtime is nearest
+# count down from 5
+# put computer to sleep if I should sleep
+# wake up N seconds
+
+# audio devices
+new_dev=$(sudo find /home -path '*/.*' -prune -o -name "pa-switch.sh" -print)
+
+# time during day
+bedcore=1200
+wakecore=1700
+bednap=1800
+wakenap=2100
+now=$(date +%H%M)
+buzzer1="xdg-open http://www.adultswim.com/videos/streams/"
+buzzer2=$()
+alarm()
+{
+    notify-send -u low -t 990 "pooter gunna scooter in 5" && sleep 1
+    notify-send -u normal -t 990 "4" && sleep 1
+    notify-send -u normal -t 990 "3" && sleep 1
+    notify-send -u critical -t 990 "2" && sleep 1
+    notify-send -u critical -t 990 "AAAAAAAAAAAAAAAAAAA" && sleep 1
+    sudo rtcwake -n -m mem -s $(($(date +%s --date=$1)-$(date +%s)))
+    bash $new_dev speakers
+    amixer -D pulse set Master 100%
+    $buzzer1
+    exit
+}
+
+if [ $now -ge $bedcore ] && [ $now -lt $wakecore ];
+then 
+    alarm $wakecore
+elif [ $now -ge $bednap ] && [ $now -lt $wakenap ];
+then
+    alarm $wakenap
+else
+    notify-send -t 2000 "no :3"
+    exit;
+fi

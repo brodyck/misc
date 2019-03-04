@@ -1,0 +1,22 @@
+#! /bin/bash
+
+syszfs='systemctl enable zfs-'
+
+${sysfs}import-cache
+${sysfs}mount
+${sysfs}import.target
+modprobe zfs
+zpool create -o ashift=12 $name mirror/stripe
+zfs set compression=lz4 $name
+zfs set zattr=sa $name
+zfs set atime=off $name
+zfs set relatime=off
+#rsync -arh --progress /tmpmnt/* /onetbtemp/
+#ls -lh /dev/disk/by-id/
+#ata-OCZ-VERTEX3_OCZ-WP92P3EA1LBF80WD
+#zpool create -o ashift=13 containers ata-OCZ-VERTEX3_OCZ-WP92P3EA1LBF80WD
+#zpool create -o ashift=12 raid0-0 stripe ata-WDC_WD10EADX-22TDHB0_WD-WCAV5T655742 ata-WDC_WD10JPCX-24UE4T0_WD-WX91A96E78DF
+
+
+#dd if=/dev/zero of=/storage0/tempfile bs=1M count=10024 conv=fdatasync,notrunc status=progress
+#dd if=tempfile of=/dev/null bs=1M count=10024 status=progress

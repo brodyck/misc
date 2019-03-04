@@ -1,0 +1,116 @@
+#! /bin/bash
+set -x
+contInfo(){
+    OS='alpine'
+    VERSION='edge'
+    ARCH='amd64'
+    PROVISION='storage'
+    CONTNAME=${CONTNAME:="${OS}-${PROVISION}"}
+    PROFILEBASE='enp2s0_br0'
+    NETWORK='br0'
+    CONTNETDEV='eth0'
+    MACADDRESS='e0:3f:49:7f:be:c8'
+    TERMEMULATOR='/bin/ash'
+    USERS=( "brody" "thorin" )
+    GROUP=( "samba" ) # Apparently the variable $GROUPS is taken for something already.
+#    COMMANDS=( "apk upgrade" "apk update" "apk add samba" "service samba start" "rc-update add samba boot" "apk add util-linux" ) 
+}
+
+lxcCommands(){ 
+    internalCommands
+    externalCommands
+}
+
+internalCommands(){ # Commands run inside container's shell
+    for y in "${COMMANDS[@]}"
+    do
+	execInCont "${y}"
+    done
+    userSetup
+    groupSetup
+}
+
+externalCommands(){ # Commands run outside/on LXC
+    setIDMaps && lxc restart ${CONTNAME}
+}
+
+setIDMaps(){
+    IDMaps 'uid'
+    IDMaps 'gid'
+#    GIDMaps
+    printf "${FORMATTEDIDS[@]}" | lxc config set ${CONTNAME} raw.idmap -
+}
+
+formatIDMaps(){
+    case ${1} in
+	"gid")
+	    FORMATTEDIDS+="gid ${MATCHEDGIDS[-1]}\n"
+	    ;;
+	"uid")
+	    FORMATTEDIDS+="uid ${MATCHEDUIDS[-1]}\n"
+	    ;;
+    esac
+}
+
+IDMaps(){ # Need to reboot cont. after running
+    local TYPE=${1}
+    if [ "${TYPE}" == "uid" ]
+    then
+	local NAMES=( ${USERS[@]} )
+	for name in ${NAMES[@]}
+	do
+	    getUID ${name}
+	    formatIDMaps ${TYPE}
+	done
+    elif [ "${TYPE}" == "gid" ]
+    then
+	local NAMES=( ${USERS[@]} ${GROUP[@]} )
+	for name in ${NAMES[@]}
+	do
+            getGID ${name}
+            formatIDMaps ${TYPE}
+	done
+    fi
+}
+
+GIDMaps(){ # There's a group for every user, so when setting GID maps, I must add them together.
+    local groups=( ${USERS[@]} ${GROUP[@]} )
+    for group in ${groups[@]}
+    do
+	getGID ${group}
+	formatIDMaps 'gid'
+    done
+}
+
+getUID(){ # Gets uid of 'user' passed to it in cont & host
+    local getuid="grep /etc/passwd -e ${1} | sed 's/:/\n/g' | head -n 3 | tail -n 1"
+    HOSTUID=$(bash -c "${getuid}")
+    CONTUID=$(execInCont "${getuid}")
+    MATCHEDUIDS+=( "${HOSTUID} ${CONTUID}" )
+}
+getGID(){ # Gets gid of 'group' passed to it in cont & host
+    local getgid="grep /etc/group -e ${1} | sed 's/:/\n/g' | head -n 3 | tail -n 1"
+    HOSTGID=$(bash -c "${getgid}")
+    CONTGID=$(execInCont "${getgid}")
+    MATCHEDGIDS+=( "${HOSTGID} ${CONTGID}" )
+}
+
+userSetup(){ # Ensure users exist in host & cont
+    for user in ${USERS[@]}
+    do
+	adduser ${user}
+	execInCont "adduser ${user}"
+    done
+}
+groupSetup(){ # Ensure groups exist in host & cont
+    for group in ${GROUP[@]}
+    do
+	addgroup ${group}
+	execInCont "addgroup ${group}"
+    done
+}
+
+
+execInCont(){
+    lxc exec ${CONTNAME} -- ${TERMEMULATOR} -c "${1}"
+}

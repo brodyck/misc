@@ -1,0 +1,8 @@
+#! /bin/bash
+11;rgb:4176/4009/3bc2# set -x
+#./install-vagrant && wait
+vagrant plugin install vagrant-lxd
+mkdir -p /root/.config/lxc
+openssl req -x509 -newkey rsa:2048 -keyout /root/.config/lxc/client.key.secure -out /root/.config/lxc/client.crt -days 3650
+openssl rsa -in /root/.config/lxc/client.key.secure -out /root/.config/lxc/client.key
+lxc config trust add /root/.config/lxc/client.crt

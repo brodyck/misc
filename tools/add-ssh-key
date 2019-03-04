@@ -1,0 +1,17 @@
+#! /bin/bash
+# Script to add my key to my github.
+gittype=${1}
+user=${2}
+password=${3}
+title=${4}
+key=${5}
+
+if [ $gittype == "github" ]
+   then
+   curl -u "${user}:${password}" --data '{"title":"${title}","key":"${key}"}' https://api.github.com/user/keys
+elif [ $gittype == "gitlab" ]
+then
+    echo "This one is too hard :("
+#   curl -u "${user}:${password}" --data '{"grant_type":"password","username":"${user}","password":"${password}"}' https://gitlab.com/api/v4/oauth/token > 
+#   curl -u "${user}:${password}" --data '{"title":"${title}","key":"${key}"}' https://gitlab.com/api/v4/user/keys
+fi

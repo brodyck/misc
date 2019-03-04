@@ -1,0 +1,63 @@
+#! /bin/bash
+
+#qemu-system-x86_64 -enable-kvm -M q35 -m 4000 -cpu host \
+#-smp 2,sockets=1,cores=2,threads=1 \
+# -bios /usr/share/qemu/bios.bin
+#-device virtio-scsi-pci,id=scsi \
+#-drive file=/home/brody/Emulation/win10/win10.qcow2,format=qcow2,id=disk,if=none,cache=directsync,aio=native \
+#-device scsi-hd,drive=disk \
+#-cdrom /home/brody/server/install-files/windows/anus.iso \
+#-device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 \
+#-device vfio-pci,host=01:00.0,bus=root.1,addr=00.0,multifunction=on,x-vga=on \
+#-device virtio-net-pci,mac=52:54:00:ea:c8:8d \
+#-boot menu=on
+
+#echo 1 > /sys/bus/pci/devices/0000:01:00.0/reset
+
+win_disk="/home/brody/Emulation/win10/win10.qcow2"
+ubunt_disk="/var/lib/libvirt/images/ubuntu17.04.qcow2"
+win_inst="/home/brody/server/install-files/windows/anus.iso"
+ubunt_inst="/home/brody/install-files/mate.iso"
+drivers="/home/brody/Emulation/win10/virtio-win-0.1.141.iso"
+mac="52:54:00:ea:c8:8d"
+upscript="/home/brody/net_up"
+downscript="/home/brody/net_down"
+romfile="/home/brody/Emulation/win10/test2.rom"
+disk="${win_disk}"
+subdev="3464"
+subven="1458"
+
+qemu-system-x86_64 \
+  -name "win10" \
+  -machine type=q35,accel=kvm \
+  -uuid 69b32640-fc23-440d-a0e2-4354f814911d \
+  -global ICH9-LPC.disable_s3=1 \
+  -global ICH9-LPC.disable_s4=1 \
+  -cpu host,kvm=off,hv_vapic,hv_relaxed,hv_spinlocks=0x1fff,hv_time,hv_vendor_id=12alphanum \
+  -smp 2,sockets=1,cores=2,threads=1 \
+  -m 4G \
+  -rtc clock=host,base=localtime \
+  -vnc 127.0.0.1:1 \
+  -serial none \
+  -parallel none \
+  -k en-us \
+  -usb -usbdevice tablet \
+  -device ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=1,chassis=1,id=root.1 \
+  -device vfio-pci,host=01:00.0,bus=root.1,addr=00.0,x-pci-sub-device-id=0x${subdev},x-pci-sub-vendor-id=0x${subven},multifunction=on,rombar=0 \
+  -device vfio-pci,host=01:00.1,bus=root.1,addr=00.1,x-pci-sub-device-id=0x${subdev},x-pci-sub-vendor-id=0x${subven},multifunction=on,rombar=0 \
+  -boot menu=on,order=c \
+  -drive id=disk0,if=virtio,cache=none,format=qcow2,file=${disk} \
+  -drive file=${ubunt_inst},media=cdrom \
+  -drive file=${drivers},index=2,media=cdrom \
+  -netdev type=tap,id=net0,ifname=tap0,script=${upscript},downscript=${downscript},vhost=on \
+  -device virtio-net-pci,netdev=net0,addr=19.0,mac=${mac}
+#  
+#  -drive file=${win_inst},media=cdrom \
+
+#  -vga none \
+#  -vnc 127.0.0.1:1 \
+ # 
+
+
+
+#,script=${upscript},downscript=${downscript},vhost=on \

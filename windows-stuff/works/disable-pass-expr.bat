@@ -1,0 +1,1 @@
+wmic UserAccount where Name='swompman' set PasswordExpires=False

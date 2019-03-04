@@ -1,0 +1,16 @@
+#! /bin/bash
+set -x
+
+case "$1" in
+     local)
+         /home/brody/Scripts/listen-bidaya local &
+	 /home/brody/Scripts/talk-bidaya local &
+	 ;;
+     net)
+	 /home/brody/Scripts/listen-bidaya net
+	 /home/brody/Scripts/talk-bidaya net
+         ;;
+     *)
+          printf "\nlocal = 192.168.2.30\nnet = funnyafricashirt.party -p 22223\n\n"
+          ;;
+esac

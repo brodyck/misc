@@ -1,0 +1,16 @@
+<domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+
+  <qemu:commandline>
+    <qemu:arg value='-device'/>
+    <qemu:arg value='vfio-pci,sysfsdev=/sys/devices/pci0000:00/0000:00:02.0/af1fcc7c-c7ff-11e7-8d12-fb3b38808891'/>
+  </qemu:commandline>
+
+  <qemu:commandline>
+    <qemu:arg value='-vgt_low_gm_sz'/>
+    <qemu:arg value='128'/>
+    <qemu:arg value='-vgt_high_gm_sz'/>
+    <qemu:arg value='512'/>
+    <qemu:arg value='-vgt_fence_sz'/>
+    <qemu:arg value='4'/>
+  </qemu:commandline>
+

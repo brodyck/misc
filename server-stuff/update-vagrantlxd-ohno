@@ -1,0 +1,49 @@
+#! /bin/bash
+# set -x
+vagrantlxdversion=0.3.4
+gitdir="${HOME}/git/unsatisfactory-hacks"
+vagrantlxddir="${gitdir}/vagrant-lxd"
+hyperkitdir="${gitdir}/hyperkit"
+rubydirs=( "${hyperkitdir}" "${vagrantlxddir}" )
+#./install-vagrant && wait
+dnf install -y ruby-devel
+rm -rf ${gitdir}
+mkdir -p ${gitdir}
+
+# clone the repos and switch to the known working commit
+git clone https://github.com/jeffshantz/hyperkit.git ${hyperkitdir}
+cd ${hyperkitdir}
+git checkout f553cf4fdfb5500bf62b24e0ef8b6a5cf9c0b4aa .
+
+git clone https://gitlab.com/catalyst-it/vagrant-lxd.git ${vagrantlxddir}
+cd ${vagrantlxddir}
+git checkout ee89a390c06054773d09bcffec0937c7d624445f .
+
+# make newest 'bundler' version work for hyperkit
+sed -i 's/~> 1\.0/>= 1\.0/g' ${hyperkitdir}/hyperkit.gemspec
+
+# make vagrant-lxd pull in the local 'hyperkit' version using the Gemfile
+# this one line is enough to encourage me to re-do this whole thing in python
+sed -i "/rubygems\.org/a gem \'hyperkit\',\ :path\ =>\ \'\/root\/git\/unsatisfactory-hacks\/hyperkit'" ${vagrantlxddir}/Gemfile
+
+# Simple loop in case more gets added
+for dir in ${rubydirs[@]}
+do
+    cd ${dir}
+    bundle install --quiet --gemfile=${dir}/Gemfile
+    if [[ $dir == ${vagrantlxddir} ]]
+    then
+	BUNDLE_GEMFILE=${dir}/Gemfile bundle exec rake build -f ${dir}/Rakefile
+	mv ${dir}/pkg/vagrant-lxd-* ${dir}/pkg/vagrant-lxd.gem
+	if snap services | grep -e "lxd" | grep -e "active"
+	then
+	    echo "lxd is running using a snap; symlinking ${HOME}/snap/lxd/current/.config/lxc/ to ${HOME}/.config/lxc"
+	    ln -fns ${HOME}/snap/lxd/current/.config/lxc/ ${HOME}/.config/lxc
+	else
+	    echo "lxd doesn't seem to be running using a snap."
+	fi
+    else
+	BUNDLE_GEMFILE=${dir}/Gemfile bundle exec rake build -f ${dir}/Rakefile
+    fi
+    vagrant plugin install ${dir}/pkg/*.gem
+done    

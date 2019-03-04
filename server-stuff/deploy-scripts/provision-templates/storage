@@ -1,0 +1,42 @@
+#! /bin/bash
+source "/root/deploy-scripts/provision-templates/useful-funcs"
+set -x
+contInfo(){
+    OS='alpine'
+    VERSION='edge'
+    ARCH='amd64'
+    PROVISION='storage'
+    CONTNAME=${CONTNAME:="${OS}-${PROVISION}"}
+    MACADDRESS='e0:3f:49:7f:be:c8'
+    TERMEMULATOR='/bin/ash'
+    USERS=( "brody" "thorin" )
+    GROUP=( "samba" ) # Apparently the variable $GROUPS is taken for something already, and this isn't important enough to figure out what
+    COMMANDS=( "apk upgrade" "apk update" "apk add samba" "service samba start" "rc-update add samba boot" "apk add util-linux" )
+    MOUNTDIRS="/disks" #"/shares" )
+    CONTNETDEV='eth0'
+    PARENTNET='br0'
+    DEVTYPE="nic"
+    NICTYPE="bridged"
+
+}
+
+# Command called from provision-cont -- Custom stuff will go here -- For ordering
+LXCSetupCommands(){ 
+    internalCommands
+    externalCommands
+}
+
+# Commands run inside container's shell
+internalCommands(){ 
+    #LXCrunCommands ${COMMANDS[@]}
+    hostContUserSetup ${USERS[@]}
+    hostContGroupSetup ${GROUP[@]}
+}
+
+# Commands run outside/on LXC
+externalCommands(){ 
+    setIDMaps && lxc restart ${CONTNAME}
+    mountDirs ${MOUNTDIRS[@]}
+    #LXCAddBridgeDevice
+}
+

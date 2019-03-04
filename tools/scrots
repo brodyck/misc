@@ -1,0 +1,110 @@
+#! /bin/bash
+#Script for a shortcut to select screenshot size manually and move it to
+#screenshot folder. 
+
+#Add it to path or keyboard shortcut for maximal usability.
+
+#I dont like aliases. I like selecting screenshot size.
+#i made this as a shortcut and put it in a folder in my path because im lazy.
+
+set -x #only debug tool i know lol
+
+#for option of more complicated filenames
+file=$(date +%y-%m-%d-%H%M%S.png)
+create=no
+
+#ahaha stole this mess from another script i wrote
+create_file_pls()
+{
+    printf '\n\nYou dont have a $SULOG_FILE set. Do you want me set it? [yes/(no)]: '
+    read -r create
+    case $create in
+	'yes'|'YES'|'y'|'Y')
+            if [ -w "/etc/login.defs" ];
+	    then	sudo printf "#
+# If defined, all su activity is logged to this file.
+#
+SULOG_FILE      /var/log/sulog" >> /etc/login.defs;
+	    else	printf '\n\nyour su login.defs dont exist lol\nCheck to see if you have SU installed.\notherwise theres an error i didnt think of.\n\nSaving as whatever user you are now.\n\n'
+			usr=$USER;
+	    fi
+            return 0
+            ;;
+        'no'|'NO'|'n'|'N')
+	    #in case i think of a better no or * optio
+            printf '\n\nok saving as user you are now.\n\n'
+	    usr=$USER
+            return 0
+            ;;
+        *)
+            printf '\n\nok saving as user you are now.\n\n'
+	    usr=$USER
+            return 0
+            ;;
+    esac
+}
+
+
+#will save to my original user directory no matter what, hopefully
+usr=$USER
+lastResort=$(users)
+testNoRoot=$(printf $lastResort | grep -om1 'root' | grep -Ec '*')
+testUserAmount=$(printf $lastResort | grep -Ec '*')
+SULOG_FILE=/var/log/sulog
+if [ "$USER" = 'root' ];
+then
+    if  [ "$testNoRoot" -eq 0 ];
+    then
+	if [ "$SUDO_USER" ];
+	then
+	    usr=$SUDO_USER;
+	else
+	    if [ -O "$SULOG_FILE" ];
+	    then
+		testsu=$(grep -Eo '[a-z]+-' "$SULOG_FILE" | grep -Eo '[a-z]+' | tail -n1)
+		if [ "$testsu" = 'root' ];
+		then
+		    if [ "$testUserAmount" -eq 1 ] && [ "$lastResort" != 'root' ];
+		    then usr=$lastResort
+			 printf '\n\nYou should probably revise this script soon, brody.\n\n';
+		    else usr=root;
+		    fi;
+		else	usr=$testsu;
+		fi;
+	    else
+		until create_file_pls; do : ; done;
+	    fi;
+	fi;
+    fi;
+fi && wait
+
+#has to be here to pick up $usr and the following if statement
+if [ "$usr" = 'root' ];
+then
+    folder="/$usr/screenshots";
+else
+    folder="/home/$usr/Pictures/Screenshots";
+fi
+
+#so i dont have to set up the folder manually if i reinstall/change users
+if [ -e "$folder" ];
+then
+    : 
+else
+    mkdir -p "$folder";
+fi
+
+#here my dumb ass couldn't get the -e option of scrot to do what i want so 
+#they are separate. Also compatible with other screenshot programs i guess.
+scrot -s $file && wait
+ls -l filename 
+#test the owner of this file. I don't know any other way.
+testown=$(ls -l $file | grep -Eom1 '1 [a-z]+' | grep -Eo '[a-z]+')
+if [ "$testown" = 'root' ];
+then
+    chown -R "$usr" $file;
+fi
+
+mv $file $folder/$file
+printf "\nSaved to $folder/$file.\n\n"
+exit

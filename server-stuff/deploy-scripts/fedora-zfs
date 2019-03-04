@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# This is in progress
+
+dnf install gpg http://download.zfsonlinux.org/fedora/zfs-release$(rpm -E %dist).noarch.rpm -y
+gpg --quiet --with-fingerprint /etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
+dnf install kernel-devel zfs -y 
+
+

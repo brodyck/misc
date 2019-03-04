@@ -1,0 +1,17 @@
+#! /bin/bash
+set -x
+
+contInfo(){
+    OS='ubuntu'
+    VERSION='18.10'
+    ARCH='amd64'
+    PROVISION='test'
+    CONTNAME=${CONTNAME:="${OS}-${PROVISION}"}
+    PROFILEBASE='enp2s0_br0'
+    TERMEMULATOR='/bin/bash'
+    EXECINCONT="lxc exec $CONTNAME"
+}
+
+lxcCommands(){
+    #${EXECINCONT} touch '/test'
+}

@@ -1,0 +1,82 @@
+#! /bin/bash
+set -x
+
+# Sets up a container formore specific usage using scripts which specify what to install + copy over
+
+provContDefineVars(){
+    DEPLOYDIR="/root/deploy-scripts"
+    CREATECONT="${DEPLOYDIR}/create-cont start"
+    DELETECONT="${DEPLOYDIR}/create-cont delete"
+    PROVISIONDIR="${DEPLOYDIR}/provision-templates"
+    PROVISIONPATH="${PROVISIONDIR}/${PROVISIONFILE}"
+    PROVISIONLOGDIR="${DEPLOYDIR}/log/provision-templates"
+}
+
+getContInfo(){
+    if [ -e ${PROVISIONPATH} ]
+    then
+	printf "=====> Provision file exists\n"
+	source $PROVISIONPATH
+	# Following command is from $PROVISIONPATH
+	contInfo
+    else
+	printf "=(!)=> Provisioning file doesn't exist, or misspelled\n"
+	ls -l $PROVISIONDIR
+	return 1
+    fi
+}
+
+setupWrapper(){
+    provContDefineVars
+    getContInfo
+}
+
+LXCPreCreation(){
+    LXCProfileSetup
+}
+LXCPostCreation(){
+    LXCSetupCommands
+}
+
+LXCStartCreation(){
+    LXCPreCreation
+    lxc launch -p ${CONTNAME} images:${OS}/${VERSION}/${ARCH} ${CONTNAME}
+    #${CREATECONT} ${OS} ${VERSION} ${ARCH} ${PROVISION} ${PROFILEBASE}
+    LXCPostCreation
+}
+
+startContWrapper(){
+    LXCStartCreation
+    LXCbackupProvision
+}
+
+createWrapper(){
+    setupWrapper
+    startContWrapper
+}
+
+LXCbackupProvision(){
+    local PROVISIONLOGFILE="${PROVISIONLOGDIR}/${CONTNAME}.$(date +%y.%m.%d.%H.%M)"
+    if [ ! -d ${PROVISIONLOGDIR} ]
+    then
+	mkdir -p ${PROVISIONLOGDIR}
+    fi
+    lxc profile show ${CONTNAME} >> ${PROVISIONLOGFILE}
+}
+
+LXCStartDeletion(){
+    #create-cont delete [OS] [version] [arch] [provision] [base profile] 
+    ${DELETECONT} ${OS} ${VERSION} ${ARCH} ${PROVISION} ${PROFILEBASE}
+}
+
+
+deleteWrapper(){
+    setupWrapper
+    LXCStartDeletion
+}
+
+testProvision(){
+    createWrapper
+    LXCStartDeletion
+}
+

@@ -1,0 +1,50 @@
+#! /bin/bash 
+### BEGIN INIT INFO                                                                                 
+# Provides:          mount-home                                                                     
+# Required-Start:    $remote_fs $syslog                                                             
+# Required-Stop:     $remote_fs$syslog                                                               
+# Default-Start:     2 3 4 5                                                                        
+# Default-Stop:      0 1 6                                                                           
+# Short-Description: Starts crypto stuff
+# Description:       Starts lots of crypto stuff                                                     
+### END INIT INFO                                                                                   
+PATH=/sbin:/bin
+NAME=startup-vale
+DESCRIPTION="Starts crypto things"
+COMMAND=startup-vale
+USER=root
+home=/home/brody/
+
+start(){
+    log_begin_msg "Starting stuff"
+	/usr/bin/x11vnc -auth guess -forever -loop -noxdamage -repeat -rfbauth /home/brody/x11vnc.pass -rfbport 5900 -shared &
+    #TODO: if thinkpad do this
+	/usr/bin/xrandr --output HDMI-1 --mode 1600x900 --pos 800x0 --rotate left
+	/usr/bin/xrandr --output LVDS-1 --mode 1280x800 --pos 0x0 --rotate right
+}
+
+stop(){
+    log_begin_msg "Starting stuff"
+	/usr/bin/killall x11vnc
+}
+restart(){
+    stop
+    start
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    status)
+        status_of_proc $DAEMON $NAME
+        ;;
+
+esac
+exit 0

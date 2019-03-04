@@ -1,0 +1,6 @@
+#! /bin/bash
+version="2.2.3"
+wget https://releases.hashicorp.com/vagrant/${version}/vagrant_${version}_x86_64.rpm
+dnf install vagrant_${version}_x86_64.rpm
+
+

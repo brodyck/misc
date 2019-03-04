@@ -1,0 +1,6 @@
+#! /bin/bash
+
+
+nmcli connection modify "Wired connection 1" ipv4.never-default true
+nmcli connection modify "Wired connection 1" ipv4.route-metric 601
+nmcli connection up "Wired connection 1"

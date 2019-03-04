@@ -1,0 +1,70 @@
+#! /bin/bash
+set -x
+# Won't give the option to delete a profile because 'lxc profile del profilename' is easy enough
+# Only adds a bridge interface to the default profile.
+
+################################################################
+# THIS WHOLE SCRIPT CAN BE RE-DONE WITH LIKE 5 LXC COMMANDS LOL
+################################################################
+
+PARENT=${2} # i want to be able to append new devices
+CONTDEVNAME=${3}
+if ${4}
+then
+    DESCRIPTION=${4}
+fi
+
+optionInit(){
+    SYSTEMDDIR="/etc/systemd/network"
+    BRIDGENETWORKFILE="${PARENT}.network"
+    BRIDGENETWORK="${SYSTEMDDIR}/${BRIDGENETWORKFILE}"
+
+    # This returns the physical slave of bridge master using MAC addresses
+    MACOFBRDEV=$(sed -n -e 's/^.*MACAddress=//p' ${BRIDGENETWORK})
+    HWBRDEV=$(ip link | grep -B1 ${MACOFBRDEV} | grep "master ${PARENT}" | sed 's/://g' | awk '{ print $2 }')
+    
+    PROFILENAME="${HWBRDEV}_${PARENT}"
+    DEVTYPE="nic"
+    NICTYPE="bridged"
+    DESCRIPTION=${DESCRIPTION:="${PROFILENAME} using ${PARENT} as ${CONTDEVNAME}"}
+
+    # This will help keep track of changes
+    YMLFOLDER="/root/log/yml"
+    YMLLOGGER=${YMLFOLDER}/${PROFILENAME}.$(date +%y.%m.%d.%H.%M)
+    if [ ! -d ${YMLFOLDER} ]
+    then
+	mkdir -p ${YMLFOLDER}
+    fi
+
+}
+
+checkForHostBridge(){
+    if ip link show ${BRIDGENAME} 
+    then :
+    else
+	printf "=(!)=> Bridge device doesn\'t exist. Check your spelling.\nip link:\n"
+	ip link show ${BRIDGENAME}
+	exit 1
+    fi
+}
+
+createLXCProfile(){
+    optionInit
+    checkForHostBridge
+    # Must create THEN edit
+    lxc profile create ${PROFILENAME}
+    lxc profile device add ${PROFILENAME} ${CONTDEVNAME} ${DEVTYPE} nictype=${NICTYPE} parent=${PARENT}
+    lxc profile show ${PROFILENAME} > "${YMLLOGGER}"
+}
+
+case "$1" in
+    'create'|'make')
+        createLXCProfile
+        printf "\n\n==> Created profile ${PROFILENAME} using ${PARENT}\n\n"
+        ;;
+    *)
+	printf "\n\n==> 'create-baseprofile create [host dev] [cont dev] \'[description]\'\n\n"
+	printf "\n\n==> To delete a profile, use \'lxc profile delete profilename\'\n\n"
+        exit 1
+        ;;
+esac

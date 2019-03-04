@@ -1,0 +1,2 @@
+printf "\nYou're in ${1}\n\n"
+lxc exec ${1} bash

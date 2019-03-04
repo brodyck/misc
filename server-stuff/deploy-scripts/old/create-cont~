@@ -1,0 +1,84 @@
+#! /bin/bash
+set -x
+#creates a basic or defined container container.
+
+#lxc network set <network> <key> <value>
+#lxc storage volume set [<remote>:]<pool> <volume> <key> <value>
+#lxc config set <container> <key> <value>
+
+optionDefaults(){
+    OS=${OS:-"alpine"}
+    VERSION=${VERSION:-"edge"}
+    ARCH=${ARCH:-"amd64"}
+    CONTPURPOSE=${CONTPURPOSE:-"base"}
+    CONTNAME=${CONTNAME:-"${OS}-${CONTPURPOSE}"}
+    BASEPROFILE=${BASEPROFILE:-"enp2s0_br0"}
+}
+
+optionDefine(){
+    OS=${1}
+    VERSION=${2}
+    ARCH=${3}
+    CONTPURPOSE=${4}
+    BASEPROFILE=${5}
+}
+
+varDefine(){
+    optionDefine ${1} ${2} ${3} ${4} ${5}
+    optionDefaults
+}
+
+createCont(){
+    lxc profile copy $BASEPROFILE $CONTNAME
+    lxc profile device add "$CONTNAME" "root" "disk" "path=/" "pool=lxd" 
+    lxc launch -p $CONTNAME images:$OS/$VERSION/$ARCH $CONTNAME
+}
+
+start(){
+    createCont && printf "\n=====> Enter $CONTNAME with \'lxc exec $CONTNAME [terminal]\'\n\n"
+}
+
+delete(){
+    lxc stop $CONTNAME
+    lxc delete $CONTNAME
+    lxc profile delete $CONTNAME
+}
+
+testCont(){
+    start
+    delete
+}
+
+varDefine ${2} ${3} ${4} ${5} ${6}
+
+case ${1} in
+
+    "make"|"create"|"start")
+	printf "=====> Starting\n"
+	start 
+	;;
+    "delete")
+	printf "=====> Deleting\n"
+	delete 
+	;;
+    "defaults")
+	printf "=====> Using defaults\n"
+	start
+	if [ "${2}" == "kill" ]
+	then
+	    delete
+	fi
+	;;
+    "test")
+	printf "\n=====> Doing test, will be deleting afterwards\n"
+	set -x
+	testCont
+	;;
+    *)
+	printf "=(!)=> Syntax is:\n \'create-cont start [OS] [version] [arch] [provision] [base profile]'\n\n"
+	printf "=(!)=> To make default container:\n \'create-cont defaults\'\n\n"
+	printf "=(!)=> To delete default container:\n \'create-cont defaults kill\'\n\n"
+	printf "=(!)=> To make default container, then immedately delete it:\n \'create-cont test ([OS] [version] [arch] [base profile] [purpose])\'\n\n"	
+	return 1
+	;;
+esac

@@ -1,0 +1,61 @@
+#! /bin/bash
+set -x
+source /root/deploy-scripts/vars
+sourceFile useful-funcs
+sourceFile prov-cont-funcs
+
+LXCClusterCreation(){
+    setupWrapper
+    LXCPreCreation
+    if [ -n ${NODES} ]       
+    then
+	for (( c=${NODES}; c>=1; c-- ))
+	do
+	    CLUSTCONTNAME="${CONTNAME}-n${c}"
+	    startClustWrapper ${CLUSTCONTNAME}
+	    printf "==> Done ${CLUSTCONTNAME}"
+	done
+    fi	
+}
+
+startClusterWrapper(){
+    LXCClusterCreation
+}
+
+LXCStartClustCreation(){
+    lxc launch -p ${CONTNAME} images:${OS}/${VERSION}/${ARCH} ${CLUSTCONTNAME}
+    LXCPostCreation
+}
+
+startClustWrapper(){
+    LXCStartClustCreation
+    LXCPackupProvision 
+}
+
+LXCClusterDelete(){
+    setupWrapper
+    if [ -n ${NODES} ]
+    then
+	for (( c=${NODES}; c>=1; c-- ))
+	do
+	    CLUSTCONTNAME="${CONTNAME}-n${c}"
+	    printf "=====> Deleting the container $CLUSTCONTNAME\n"
+	    deleteClustWrapper
+	    printf "==> Done ${CLUSTCONTNAME}"
+	done
+    fi	
+}
+
+deleteClustWrapper(){
+    snap stop lxd # Need this or else you get 'dataset is busy' error
+    #https://github.com/lxc/lxd/issues/4656#issuecomment-402550696
+    LXCStartClustDeletion
+    snap start lxd
+}
+
+LXCStartClustDeletion(){
+    # This deletes things using same arguments                                                         
+    lxc stop $CLUSTCONTNAME
+    lxc delete $CLUSTCONTNAME
+    lxc profile delete $CONTNAME
+}

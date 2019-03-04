@@ -1,0 +1,29 @@
+#! /bin/bash
+set -x
+
+source /root/deploy-scripts/vars
+sourceFile prov-cont-funcs
+
+case ${1} in
+     "start"|"make")
+	 printf "\n=====> Starting to make $CONTPROVISION\n"
+
+	 PROVISIONFILE=${2}
+	 createWrapper
+	 ;;
+     "delete")
+	 printf "=====> Deleting the container $CONTPROVISION\n"
+	 PROVISIONFILE=${2}
+	 deleteWrapper
+	 ;;
+     "test")
+	 testProvision
+	 exit 0
+	 ;;
+     *)
+	 printf "=====> Run using \'setup-cont start [provision]\'\n"
+	 printf "=====> For ease of use, name provisioning file what you want it to do."
+	 printf "=====> List of provision files:"
+	 /bin/bash ls -l $PROVISIONDIR
+	 ;;
+esac

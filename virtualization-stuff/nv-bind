@@ -1,0 +1,1 @@
+echo "0000:01:00.0" > /sys/bus/pci/drivers/vfio-pci/bind

@@ -1,0 +1,78 @@
+#! /bin/bash
+# DONT RUN AS ROOT! AHAHA!
+#requires spd-say, pactl, pacmd, amixer, grep
+# Plays a inaudible sound, then gets the not 'running' device. This is because pulseaudio forces devices into an 'idle'/'suspend' mode for power savings, but there's no other way to parse an output for a default device.
+notify(){
+    notify-send -u normal -t 990 "${1}"
+}
+setsink(){
+    if [ ! ${#1} -eq 1 ]
+    then
+       notify 'error lol'
+       exit
+    fi
+    local sink=${1}
+    amixer -D pulse set Master 0% # so we don't get any ear shattering screetches between switching
+    (
+	# Sets the new default link (if only they had a 'get-default-link' command)
+	echo set-default-sink $new_sink
+	
+	# Sets every audio input to the new sink
+	pacmd list-sink-inputs | grep -E '^\s*index:' | grep -oE '[0-9]+' |
+	    while read input
+	    do
+		echo move-sink-input $input $sink
+	    done
+	# this whole section is within a subshell of the pacmd interface i guess
+    ) | pacmd > /dev/null
+}
+
+volume(){
+    if [ $new_sink -eq $headphones ];
+    then
+	amixer -D pulse set Master 35%
+    elif [ $new_sink -eq $laptop_speakers ];
+    then
+	# this statement is to avoid tweeting noise if there's an input device using passthrough
+	if pactl list short | grep -e "module-loopback";
+	then
+	    amixer -D pulse set Master 50%
+	else
+	    amixer -D pulse set Master 6%5
+	fi
+    fi
+}
+
+set -x
+spdsay=$(spd-say -r -100 -i 100 "pooooop")
+listsinks=$($spdsay && pactl list short sinks)
+greprun=$(echo "$listsinks" | grep -v RUNNING)
+# This finds the currently NOT-running sink:
+running_sink=$(spd-say -i -100 "boopis lal" && pactl list short sinks | grep -v RUNNING | grep -oE '^[0-9]+')
+
+if [ -z "$running_sink" ];
+then
+    running_sink=0
+    #notify "$listsinks"
+    #notify "$greprun"
+    notify "Set to laptop output."
+    #exit
+fi
+
+# Sets volume to 50% if big speakers are selected
+headphones=$(pactl list short sinks | grep -E 'usb' | grep -oE '^[0-9]+')
+laptop_speakers=$(pactl list short sinks | grep -E 'pci-0000_00_1f' | grep -oE '^[0-9]+')
+
+new_sink=${running_sink}
+
+if [ ${#new_sink} -eq 1 ];
+then
+    setsink ${new_sink}
+    volume
+    exit
+else
+    new_sink=0
+    setsink ${new_sink}
+    volume
+    exit
+fi

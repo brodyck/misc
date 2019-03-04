@@ -1,0 +1,1 @@
+while [[ "read -n1 -r" != : ]]; do speaker-test -l 0 -p 1 -t pink=use; done

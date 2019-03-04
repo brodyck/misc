@@ -1,0 +1,46 @@
+#! /bin/bash
+set -x
+source /root/deploy-scripts/vars
+sourceFile useful-funcs
+
+# Creates or destroys a basic or test container.
+
+createContDefaultVars(){
+    OS=${OS:-"alpine"}
+    VERSION=${VERSION:-"edge"}
+    ARCH=${ARCH:-"amd64"}
+    PURPOSE=${PURPOSE:-"test"} # AKA provision
+    BASEPROFILE=${BASEPROFILE:-"default"}
+    CONTNAME=${CONTNAME:-"${OS}-${PURPOSE}"}
+}
+
+createContDefineVars(){
+    OS=${1}
+    VERSION=${2}
+    ARCH=${3}
+    PURPOSE=${4}
+    BASEPROFILE=${5}
+#    createContDefaultVars
+}
+
+startCreateCont(){
+    lxc launch -p ${CONTNAME} images:${OS}/${VERSION}/${ARCH} ${CONTNAME}
+
+}
+
+delete(){
+    # This deletes things using same arguments
+    lxc stop $CONTNAME
+    snap stop lxd # Need this or else you get 'dataset is busy' error
+    #https://github.com/lxc/lxd/issues/4656#issuecomment-402550696
+    lxc delete $CONTNAME
+    lxc profile delete $CONTNAME
+    snap start lxd
+}
+
+testCont(){
+    # Creates and deletes a container, for easy testing.
+    startCreateCont
+    delete
+}
+

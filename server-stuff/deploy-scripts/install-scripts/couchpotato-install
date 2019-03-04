@@ -1,0 +1,20 @@
+#! /bin/bash
+PGID=${1}
+PUID=${2}
+TIMEZONE=${3} # Should be Canada/Calgary
+PORTS="5050:5050"
+CONFIGDIR="$HOME/config:/config"
+DOWNLOADDIR="$HOME/downloads:/downloads"
+MOVIEDIR="$HOME/movies:/movies"
+docker create \
+       --name=couchpotato \
+       -v ${CONFIGDIR}	  \
+       -v ${DOWNLOADDIR} \
+       -v ${MOVIEDIR}	  \
+       -e ${PGID} 	  \
+       -e ${PUID}	  \
+       -e "TZ=${TIMEZONE}"\
+       -e UMASK_SET=022	  \
+       -p ${PORTS}	  \
+       linuxserver/couchpotato
+docker start couchpotato

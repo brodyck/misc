@@ -1,0 +1,14 @@
+Description:
+  Show profile configurations
+
+Usage:
+  lxc profile show [<remote>:]<profile> [flags]
+
+Global Flags:
+      --debug            Show all debug messages
+      --force-local      Force using the local unix socket
+  -h, --help             Print help
+      --project string   Override the source project
+  -q, --quiet            Don't show progress information
+  -v, --verbose          Show all information messages
+      --version          Print version number

@@ -1,0 +1,86 @@
+#! /bin/bash
+set -x
+contInfo(){
+    OS='alpine'
+    VERSION='edge'
+    ARCH='amd64'
+    PROVISION='storage'
+    CONTNAME=${CONTNAME:="${OS}-${PROVISION}"}
+    PROFILEBASE='enp2s0_br0'
+    NETWORK='br0'
+    CONTNETDEV='eth0'
+    MACADDRESS='e0:3f:49:7f:be:c8'
+    TERMEMULATOR='/bin/ash'
+    USERS=( "brody" "thorin" )
+    GROUP=( "samba" ) # Apparently the variable $GROUPS is taken for something already.
+#    COMMANDS=( "apk upgrade" "apk update" "apk add samba" "service samba start" "rc-update add samba boot" "apk add util-linux" ) 
+}
+
+lxcCommands(){ 
+    internalCommands
+    externalCommands
+}
+
+internalCommands(){ # Commands run inside container's shell
+    for y in "${COMMANDS[@]}"
+    do
+	execInCont "${y}"
+    done
+    userSetup
+    groupSetup
+}
+
+externalCommands(){ # Commands run outside/on LXC
+    setUIDMaps && setGIDMaps && lxc restart ${CONTNAME}
+}
+
+setUIDMaps(){ # Need to reboot cont. after running
+    for name in ${USERS[@]}
+    do
+	getUID ${name}
+	lxc config set ${CONTNAME} raw.idmap "uid ${HOSTUID} ${CONTUID}"
+    done
+}
+
+userSetup(){ # Ensure users exist in host & cont
+    for user in ${USERS[@]}
+    do
+	adduser ${user}
+	execInCont "adduser ${user}"
+    done
+}
+
+getUID(){ # Gets uid of 'user' passed to it in cont & host
+    local getuid="grep /etc/passwd -e ${1} | sed 's/:/\n/g' | head -n 3 | tail -n 1"
+    # HOSTUID=$(grep /etc/passwd -e "${1}" | sed 's/:/ /g' | awk '{ print $3 }')
+    HOSTUID=$(bash -c "${getuid}")
+    # For the following, I cannot get 'awk' to work under 'lxc exec'
+    # CONTUID=$(execInCont "grep /etc/passwd -e ${1} | sed 's/:/\n/g' | head -n 3 | tail -n 1")
+    CONTUID=$(execInCont "${getuid}")
+}
+
+setGIDMaps(){ # There's a group for every user, so when setting GID maps, I must add them together.
+    local groups=( ${USERS[@]} ${GROUP[@]} )
+    for group in ${groups[@]}
+    do
+	getGID ${group}
+	lxc config set ${CONTNAME} raw.idmap "gid ${HOSTGID} ${CONTGID}"
+    done
+}
+
+groupSetup(){ # Ensure groups exist in host & cont
+    for group in ${GROUP[@]}
+    do
+	addgroup ${group}
+	execInCont "addgroup ${group}"
+    done
+}
+
+getGID(){ # Gets gid of 'group' passed to it in cont & host
+    HOSTGID=$(grep /etc/group -e ${1} | sed 's/:/\n/g' | head -n 3 | tail -n 1)
+    CONTGID=$(execInCont "grep /etc/group -e ${1} | sed 's/:/\n/g' | head -n 3 | tail -n 1")
+}
+
+execInCont(){
+    lxc exec ${CONTNAME} -- ${TERMEMULATOR} -c "${1}"
+}

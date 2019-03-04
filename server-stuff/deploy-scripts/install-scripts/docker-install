@@ -1,0 +1,6 @@
+apt install -y docker docker-compose
+#mkdir ~/docker
+#cd ~/docker
+##curl -fsSL https://get.docker.com -o get-docker.sh
+#sh get-docker.sh
+#apt install -y docker-compose

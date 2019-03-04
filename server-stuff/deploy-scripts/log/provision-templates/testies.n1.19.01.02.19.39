@@ -1,0 +1,26 @@
+config: {}
+description: ""
+devices:
+  eth0:
+    nictype: bridged
+    parent: br0
+    type: nic
+  root:
+    path: /
+    pool: lxd
+    type: disk
+name: testies.n1
+used_by: []
+config: {}
+description: ""
+devices:
+  eth0:
+    nictype: bridged
+    parent: br0
+    type: nic
+  root:
+    path: /
+    pool: lxd
+    type: disk
+name: testies.n1
+used_by: []

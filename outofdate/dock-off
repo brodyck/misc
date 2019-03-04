@@ -1,0 +1,7 @@
+#! /bin/bash
+
+monitors=$(sudo find /home -path '*/.*' -prune -o -name "mont-off.sh" -print)
+mounts=$(sudo find /home -path '*/.*' -prune -o -name "mnt-off.sh" -print)
+sh $monitors
+sh $mounts
+exit

@@ -1,0 +1,28 @@
+#! /bin/bash
+set -x
+source /root/deploy-scripts/vars
+sourceFile useful-funcs
+sourceFile prov-cont-funcs
+sourceFile prov-clust-funcs
+
+case ${1} in
+     "create"|"make")
+         printf "\n=====> Starting to make $CONTPROVISION\n"
+	 PROVISIONFILE=${2}
+         startClusterWrapper
+         ;;
+     "delete")
+	 PROVISIONFILE=${2}
+	 deleteClusterWrapper
+         ;;
+     "test")
+         testProvision
+         exit 0
+         ;;
+     *)
+         printf "=====> Run using \'provision-clust start [provision]\'\n"
+         printf "=====> For ease of use, name provisioning file what you want it to do."
+         printf "=====> List of provision files:"
+         /bin/bash ls -l $PROVISIONDIR
+         ;;
+esac

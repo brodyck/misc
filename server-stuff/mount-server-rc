@@ -1,0 +1,14 @@
+#!/sbin/openrc-run
+###depend() {
+###    need localmount sysfs
+###    before lxc.files
+###}
+
+start(){
+bash /etc/init.d/mount-server start
+}
+
+stop(){
+bash /etc/init.d/mount-server stop
+}
+

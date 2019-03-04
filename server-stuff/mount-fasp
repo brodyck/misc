@@ -1,0 +1,5 @@
+#! /bin/bash
+set -x
+sayonara="192.168.2.20"
+sshfsOpts="/root/Files-fasp -o IdentityFile=/root/.ssh/id_ed25519,auto_cache,allow_root"
+sshfs root@${sayonara}:/disks ${sshfsOpts},cipher=arcfour,compression=no

@@ -1,0 +1,24 @@
+#! /bin/bash
+
+DEPLOYSCRIPTDIR="/root/deploy-scripts"
+CREATECONT="create-bridge"
+CREATEBASEPROF="create-baseprofile"
+CONTDEVICE="ata-OCZ-VERTEX3_OCZ-WP92P3EA1LBF80WD" # Write function to find /dev/sd* from 'ls -lh /dev/disk/by-id/'
+CREATESTORAGE="lxc storage create lxd zfs source=${CONTDEVICE}"
+
+setenforce permissive # Figure out a way to do this without setting permissive
+dnf install snapd -y
+snap install lxd -y
+snap start lxd
+snap enable lxd
+
+
+#snap services lxd
+#setup network device
+#lxc network create br0 bridge.external_interfaces=enp2s0 ipv4.address=none ipv4.dhcp=false ipv6.address=none ipv6.dhcp=false bridge.hwaddr=${MAC}
+
+## creating the groups/users for lxd
+## add user to LXD group
+# usermod -a -G lxd ${user}
+# newgrp lxd
+#lxc storage create lxd zfs source=

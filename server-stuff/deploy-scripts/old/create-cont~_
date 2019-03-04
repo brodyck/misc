@@ -1,0 +1,103 @@
+#! /bin/bash
+
+#set -x
+
+#creates or destroys a basic or defined container container.
+
+# Commands to remember:
+#  lxc network set <network> <key> <value>
+#  lxc storage volume set [<remote>:]<pool> <volume> <key> <value>
+#  lxc config set <container> <key> <value>
+
+createContDefaultVars(){
+    # This function allows for quick setup of container by setting defaults
+    # Also defines anything that wasn't set when the script was called
+    OS=${OS:-"alpine"}
+    VERSION=${VERSION:-"edge"}
+    ARCH=${ARCH:-"amd64"}
+    PURPOSE=${PURPOSE:-"test"} # AKA provision
+    PROFILEBASE=${PROFILEBASE:-"enp2s0_br0"}
+    # This last one ensures the container's name makes sense, ie: 'OS-purpose', eg: 'ubuntu-fileshare'
+    CONTNAME=${CONTNAME:-"${OS}-${PURPOSE}"}
+}
+
+createContDefineVars(){
+    # This function sets variables passed to the script to create the container
+    OS=${1}
+    VERSION=${2}
+    ARCH=${3}
+    PURPOSE=${4}
+    BASEPROFILE=${5}
+    createContDefaultVars
+}
+
+createCont(){
+    # This function creates the profile + container
+    # Copies the base profile, names it same as container's name
+    printf "=====>"
+    lxc profile copy $BASEPROFILE $CONTNAME
+    # Adds the path to the /root directory
+    printf "=====>"
+    lxc profile device add "$CONTNAME" "root" "disk" "path=/" "pool=lxd"
+    # Creates the container using passed variables
+    
+    ############################################################
+    # FIND A WAY TO RUN THE FOLLOWING AS UN-PRIVILEGED USER
+    ############################################################
+    printf "=====>"    
+    lxc launch -p $CONTNAME images:$OS/$VERSION/$ARCH $CONTNAME
+}
+
+start(){
+    # Does the work
+    createCont 
+}
+
+delete(){
+    # This deletes things using same arguments
+    lxc stop $CONTNAME
+    printf "\n=====> "
+    lxc delete $CONTNAME
+    printf "\n=====> "
+    lxc profile delete $CONTNAME
+}
+
+testCont(){
+    # Creates and deletes a container, for easy testing.
+    start
+    delete
+}
+
+createContDefineVars ${2} ${3} ${4} ${5} ${6}
+
+case ${1} in
+    "make"|"create"|"start")
+	printf "=====> Starting\n"
+	start
+	printf "\n=====> Enter $CONTNAME with \'lxc exec $CONTNAME [terminal]\'\n\n"
+	;;
+    "delete")
+	printf "=====> Deleting\n"
+	delete 
+	;;
+    "defaults")
+	printf "=====> Using defaults\n"
+	start
+	if [ "${2}" == "kill" ]
+	then
+	    delete
+	fi
+	;;
+    "test")
+	printf "\n=====> Doing test, will be deleting afterwards\n"
+	set -x
+	testCont
+	;;
+    *)
+	printf "=(!)=> Syntax is:\n \'create-cont start [OS] [version] [arch] [provision] [base profile]'\n\n"
+	printf "=(!)=> To make default container:\n \'create-cont defaults\'\n\n"
+	printf "=(!)=> To delete default container:\n \'create-cont defaults kill\'\n\n"
+	printf "=(!)=> To make default container, then immedately delete it:\n \'create-cont test ([OS] [version] [arch] [base profile] [purpose])\'\n\n"	
+	return 1
+	;;
+esac

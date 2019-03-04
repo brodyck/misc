@@ -1,0 +1,41 @@
+https://float-middle.com/ubuntu-18-04-steam-and-nvidia-390/
+
+sudo apt-get purge nvidia* bumblebee*
+
+sudo add-apt-repository ppa:graphics-drivers/ppa
+sudo apt-get update
+
+sudo apt-get install \
+    nvidia-driver-390 \
+    nvidia-modprobe \
+    bumblebee \
+    bumblebee-nvidia \
+    primus \
+    linux-headers-generic
+
+sudo systemctl enable bumblebeed
+sudo systemctl disable nvidia-fallback.service
+sudo systemctl disable gpu-manager.service
+sudo prime-select intel
+
+sudo nano /etc/bumblebee/bumblebee.conf
+[bumblebeed]
+>Driver=nvidia
+[optirun]
+>Bridge=primus
+[driver-nvidia]
+>LibraryPath=/usr/lib/x86_64-linux-gnu:/usr/lib/i386-linux-gnu
+>XorgModulePath=/usr/lib/x86_64-linux-gnu/nvidia/xorg,/usr/lib/xorg/modules,/usr/lib/xorg/modules/input
+
+sudo nano /etc/environment
+__GLVND_DISALLOW_PATCHING=1
+
+sudo nano /etc/modules
+i915
+bbswitch
+
+
+sudo nano /etc/modprobe.d/blacklist-nvidia.conf
+#alias nvidia off
+alias nvidia-drm off
+alias nvidia-modeset off

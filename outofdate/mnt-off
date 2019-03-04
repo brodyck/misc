@@ -1,0 +1,16 @@
+#! /bin/sh
+if mount | grep overlay ;
+then
+    sudo umount /home/brody/Music && wait
+    sudo umount /home/brody/Videos && wait
+    notify-send -t 4000 "You are the smartest, strongest man there ever has been, or will be." "You are man encarnate, for all eternity."
+    exit;
+else
+    notify-send -t 3000 "You're so stupid." "You are literally the dumbest man." && sleep 5
+    notify-send -t 3500 "I hate you." "I'll never have the displeasure of meeting a dumber man." && sleep 5
+    notify-send -t 3500 "You're retarded." "Why do we let you continue everyone's torture of letting yourself breath? 
+    		
+I will never know."
+    exit;
+fi
+exit

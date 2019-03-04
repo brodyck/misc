@@ -1,0 +1,14 @@
+#! /bin/bash
+
+mimic="mimic -t '${2}'"
+case "$1" in
+     local)
+          ssh -C root@192.168.2.30 ${mimic}
+          ;;
+     net)
+          ssh -C root@funnyafricashirt.party -p 22223 ${mimic} 
+          ;;
+     *)
+          printf "\nlocal = 192.168.2.30\nnet = funnyafricashirt.party -p 22223\n\n"
+          ;;
+esac

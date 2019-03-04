@@ -1,0 +1,32 @@
+#! /bin/bash
+set -x
+device=${1:-'wacom'} 		#to default device to wacom; give arguments by name
+xinp='xinput'									#lol
+partCMD=$("$xinp" | grep -ni -e $device)		#first step
+i=1
+numOfID=$(echo "$partCMD" | wc -l)				#count lines
+IDpart=$(echo "$partCMD" | grep -n -ow 'id=[0-9]\{0,1\}[0-9]')	#find IDs and number 'em
+#test needed for floating/attaching
+test=$(echo "$partCMD" | grep -i -e floating)	#what is my purpose?
+
+if [ -z "$test" ];			#float if :, attach if !
+then
+    stateChange=float;
+else 
+    stateChange=reattach
+    master='Virtual core pointer';	#name of device wacom belongs to
+fi
+#/test
+
+while [ ${i} -le ${numOfID} ]; do
+    ID=$(echo "$IDpart" | grep -m1 -e "$i" | tail -c 3)
+    if [[ "$ID" =~ =[0-9] ]];
+    then 
+	ID=$(echo "$IDpart" | grep -m1 -e "$i" | tail -c 2);
+    else
+				ID=$(echo "$IDpart" | grep -m1 -e "$i" | tail -c 3);
+    fi	#refresh i every loop
+    xinput $stateChange $ID "$master" #badda bing badda boom
+    i=$(($i + 1))
+done
+xinput list #to check 

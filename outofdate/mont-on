@@ -1,0 +1,11 @@
+#!/bin/bash
+# xrandr --newmode "acer"  106.50  1440 1528 1672 1904  900 903 909 934 -hsync +vsync
+# xrandr --addmode VGA-1 acer
+#xrandr --output VGA-1 --primary --mode acer --left-of 
+
+xrandr --output LVDS-1 --off
+xrandr --output HDMI-1 --mode 1600x900 --pos 900x0 --pos 0x0 --rotate left
+xrandr --output VGA-1 --primary --mode 1440x900 --pos 900x700 
+
+
+exit

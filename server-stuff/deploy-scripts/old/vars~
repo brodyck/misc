@@ -1,0 +1,11 @@
+#! /bin/bash
+# General vars, mostly to keep paths in check
+set -x
+
+
+sourceFile(){
+    local scriptName=${1}
+    deployDir="/root/deploy-scripts"
+    scriptPath=$(find ${deployDir} -path '*/.*' -prune -o -name "${scriptName}" -print)
+    source scriptPath
+}

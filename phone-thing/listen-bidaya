@@ -1,0 +1,13 @@
+#! /bin/bash
+
+case "$1" in
+     local)
+     	  ssh -C root@192.168.2.30 arecord -f dat -D plughw:0,0|aplay -f dat
+	  ;;
+     net)
+	  ssh -C root@funnyafricashirt.party -p 22223 arecord -f dat -D plughw:0,0|aplay -f dat
+	  ;;
+     *)
+          printf "\nlocal = 192.168.2.30\nnet = funnyafricashirt.party -p 22223\n\n"
+	  ;;
+esac

@@ -1,0 +1,4 @@
+# /bin/bash
+set -x 
+xfreerdp /u:dogman "/p:" /v:192.168.122.198:3389 /w:1600 /h:900 /bpp:32 +clipboard +fonts /gdi:hw /rfx /rfx-mode:video /sound:sys:pulse +menu-anims +window-drag
+xfreerdp /u:duh "/p:" /v:192.168.99.3:3389 /w:1600 /h:900 /bpp:32 +clipboard +fonts /gdi:hw /rfx /rfx-mode:video /sound:sys:pulse +menu-anims +window-drag

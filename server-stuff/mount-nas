@@ -1,0 +1,20 @@
+#! /bin/bash                                                                                           
+set -x
+sayonara="192.168.2.20"
+sshfsOpts="/root/Files-fasp -o IdentityFile=/root/.ssh/id_ed25519,auto_cache"
+
+if mount | grep "Files-fasp" ;
+    then
+        sudo umount "Files-fasp"
+        exit;
+    else
+        if hostname -I | grep "192.168.2.*";
+        then
+            sshfs root@${sayonara}:/disks ${sshfsOpts},cipher=arcfour,compression=no -p 22
+            exit;
+        else
+            sudo -u 'brody' sshfs root@funnyafricashirt.party:/disks ${sshfsOpts},auto_cache -p 22222
+            exit;
+        fi
+fi
+

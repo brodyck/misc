@@ -1,0 +1,38 @@
+#! /bin/bash
+set -x
+device=${1:-'wacom'} 		 #to default device to wacom; give arguments by name
+xinp='xinput'			 #lol
+partCMD=$("$xinp" | grep -ni -e $device)		#first step
+i=1
+numOfID=$(echo "$partCMD" | wc -l)				#count lines
+IDpart=$(echo "$partCMD" | grep -n -ow 'id=[0-9]\{0,1\}[0-9]')	# #:ID
+
+#test nedded for enabling/disabling
+ID=$(echo "$IDpart" | grep -m1 -e "$i" | tail -c 3)
+if [[ "$ID" =~ =[0-9] ]];
+then 
+    ID=$(echo "$IDpart" | grep -m1 -e "$i" | tail -c 2);
+else
+    ID=$(echo "$IDpart" | grep -m1 -e "$i" | tail -c 3);
+fi
+test=$(xinput list-props "$ID" | grep -m1 -wo '[0-1]')	#what is my purpose?
+if [ "$test" = 0 ];					#float if :, attach if !
+then
+    stateChange=enable;
+else 
+    stateChange=disable;
+fi
+#/test
+
+while [ ${i} -le ${numOfID} ]; do		#refresh i every loop
+    ID=$(echo "$IDpart" | grep -m1 -e "$i" | tail -c 3)
+    if [[ "$ID" =~ =[0-9] ]];
+    then 
+	ID=$(echo "$IDpart" | grep -m1 -e "$i" | tail -c 2);
+			else
+			    ID=$(echo "$IDpart" | grep -m1 -e "$i" | tail -c 3);
+    fi
+    xinput $stateChange $ID && wait		#badda bing badda boom
+    i=$(($i + 1))
+done
+xinput list							#to check 

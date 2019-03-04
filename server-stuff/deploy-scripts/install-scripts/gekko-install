@@ -1,0 +1,10 @@
+cd ~/
+apt install -y nodejs git docker-compose \
+git clone git://github.com/askmike/gekko.git -b stable \
+cd ~/gekko
+docker-compose build 
+HOST=mydomain.com PORT=3001 docker-compose up -d 
+
+git clone git://github.com/adolfintel/speedtest.git && \
+apt install git && \
+cd ~/speedtest && \

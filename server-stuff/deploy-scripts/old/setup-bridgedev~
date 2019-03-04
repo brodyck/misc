@@ -1,0 +1,103 @@
+#! /bin/bash
+#set -x
+# This creates a named bridge on a named interface, and deletes it.
+# Must be given a command($1), interface($2) and a name for a bridge($3)
+INTERFACE=${2}
+BRIDGENAME=${3}
+SYSTEMDDIR="/etc/systemd/network/"
+INTERFACENETWORKD="${INTERFACE}.network"
+BRIDGENETWORKD="${BRIDGENAME}.network"
+BRIDGENETDEVD="${BRIDGENAME}.netdev"
+CONFIGLOGGER="$(date +%y.%m.%d.%H.%M)"
+CONFIGLOGDIR="/root/log/bridge"
+if [ ! -d ${CONFIGLOGDIR} ]
+then
+    mkdir -p ${CONFIGLOGDIR}
+fi
+
+optionInit(){
+    MACADDR=$(/usr/sbin/ip a s ${INTERFACE} | grep 'link/ether' | awk '{ print $2 }')
+    # The ${var:='string'} makes 'string' the value, unless var is already set.
+    # It defaults to making a valid file with DHCP on in case of an error.
+    # This helps ensure an SSH connection will not drop.
+    DHCP=${DHCP:='DHCP=yes'} 
+    BRIDGE=${BRIDGE:=''}
+    BRIDGELOG="" # will eventually output the files generated to a folder so i can log changes
+    BRIDGENETDEVFILE="[NetDev]
+Name=${BRIDGENAME}
+Kind=bridge"
+    BRIDGENETWORKFILE="[Match]
+Name=${BRIDGENAME}
+[Link]
+MACAddress=${MACADDR}
+[Network]
+DHCP=yes"
+    INTERFACENETWORKFILE="[Match]
+Name=${INTERFACE}
+[Network]
+${DHCP}
+${BRIDGE}"
+}
+
+createBridge(){
+    DHCP="DHCP=no"
+    BRIDGE="[Network]
+Bridge=${BRIDGENAME}"
+    optionInit
+    if [ ! -f ${BRIDGENETDEVD} ]
+    then
+	printf "${BRIDGENETDEVFILE}" > ${SYSTEMDDIR}/${BRIDGENETDEVD}	
+	printf "${BRIDGENETDEVFILE}" > ${CONFIGLOGDIR}/${BRIDGENETDEVD}.${CONFIGLOGGER}
+    fi
+    
+    if [ ! -f $BRIDGENETWORKD ]
+    then
+	printf "${BRIDGENETWORKFILE}" > ${SYSTEMDDIR}/${BRIDGENETWORKD}
+	printf "${BRIDGENETWORKFILE}" > ${CONFIGLOGDIR}/${BRIDGENETWORKD}.${CONFIGLOGGER}
+    fi
+    
+    if [ ! -f ${INTERFACENETWORKD} ]
+    then
+	printf "${INTERFACENETWORKFILE}" > ${SYSTEMDDIR}/${INTERFACENETWORKD}
+	printf "${INTERFACENETWORKFILE}" > ${CONFIGLOGDIR}/${INTERFACENETWORKD}.${CONFIGLOGGER}
+    
+    fi
+}
+
+destroyBridge(){
+    optionInit
+    rm -f ${BRIDGENETWORKD}
+    rm -f ${BRIDGENETDEVD}
+    if [[ ${INTERFACE} ]]
+    then
+	printf "${INTERFACENETWORKFILE}" > ${SYSTEMDDIR}/${INTERFACENETWORKD}
+    fi
+    # Networkctl doesn't have a 'delete' command
+    # Networkd doesn't delete networks when their .network/.netdev file is gone and the service is restarted
+    ip link del ${BRIDGENAME}
+}
+
+resetNetwork(){
+    systemctl stop systemd-networkd
+    systemctl disable systemd-networkd
+    systemctl enable systemd-networkd
+    systemctl start systemd-networkd
+    sleep 2 && networkctl
+
+}
+
+case "$1" in
+    'create'|'make')
+        createBridge
+	resetNetwork
+	printf "\n\n==> Created bridge ${BRIDGENAME} on interface ${INTERFACE}\n\n"
+        ;;
+    'destroy'|'del'|'delete')
+        destroyBridge
+	resetNetwork
+	printf "\n\n==> Destroyed bridge ${BRIDGENAME} on interface ${INTERFACE}\n\n"      
+        ;;
+    *)
+	exit 1
+	;;
+esac

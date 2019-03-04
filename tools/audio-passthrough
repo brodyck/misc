@@ -1,0 +1,22 @@
+#! /bin/bash
+set -x
+
+# This finds the currently running sink
+running_sink=$(spd-say -i -100 "boopis lal" && pactl list short sinks | grep RUNNING | grep -oE '^[0-9]+')
+# This is the input on my c-media USB sound card
+audio_in=1
+
+if pactl list short | grep -e "module-loopback";
+then
+    amixer -D pulse set Capture 100%
+    pactl unload-module module-loopback
+    amixer -D pulse set Capture 100%
+else
+    # I have the volume settings change before and after to avoid bursts of loud audio if the volume gets changed manually/faster than output change
+    amixer -D pulse set Capture 100%
+    amixer -D pulse set Master 50%
+    pactl load-module module-loopback source=1 sink=${running_sink}
+    amixer -D pulse set Capture 100%
+    amixer -D pulse set Master 50%
+fi
+

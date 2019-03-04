@@ -1,0 +1,4 @@
+#! /bin/bash
+cd ${HOME}/Projects/git/dash-stuff
+source .venv/bin/activate
+

@@ -1,0 +1,14 @@
+config: {}
+description: Default LXD profile
+devices:
+  eth0:
+    nictype: bridged
+    parent: br0
+    type: nic
+  root:
+    path: /
+    pool: lxd
+    type: disk
+name: alpine-storage
+used_by:
+- /1.0/containers/alpine-storage

@@ -1,0 +1,4 @@
+#echo 1 > /sys/bus/pci/devices/0000:00:02.0/*/remove
+echo af1fcc7c-c7ff-11e7-8d12-fb3b38808891 > "/sys/bus/pci/devices/0000:00:02.0/mdev_supported_types/i915-GVTg_V5_4/create"
+echo af1fcc7c-c7ff-11e7-8d12-fb3b38808891 > /sys/bus/mdev/drivers/vfio_mdev/unbind
+

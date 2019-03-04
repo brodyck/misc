@@ -1,0 +1,36 @@
+#! /bin/bash
+source "/root/deploy-scripts/provision-templates/useful-funcs"
+contInfo(){
+    OS='ubuntu'
+    VERSION='18.04'
+    ARCH='amd64'
+    PROVISION='androidtv'
+    CONTNAME=${CONTNAME:="${OS}-${PROVISION}"}
+    CONTNAME="donald"
+    PROFILEBASE='enp2s0_br0'
+    NODES="3"
+    NETWORK='br0'
+    CONTNETDEV='eth0'
+    #MACADDRESS='e0:3f:49:7f:be:c8' doesn't work right now
+    TERMEMULATOR='/bin/bash'
+    #USERS=( "parents" )
+    #GROUP=( "" ) # Apparently the variable $GROUPS is taken for something already, and this isn't important enough to figure out what
+    COMMANDS=( "echo 'test' > poo" )
+    #PUSHFILE1=( "/root/deploy-scripts/couchpotato-install" "" )
+    MOUNTDIRS="/disks" #"/shares" )
+}
+
+SetupCommands(){
+    internalCommands
+    externalCommands
+}
+
+internalCommands(){
+    hostContUserSetup ${USERS[@]}
+    hostContGroupSetup ${GROUP[@]}
+}
+
+externalCommands(){
+    setIDMaps && lxc restart
+    mountDirs ${MOUNTDIRS[@]}
+}

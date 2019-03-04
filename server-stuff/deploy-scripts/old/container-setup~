@@ -1,0 +1,27 @@
+#user=${1}
+#distro="alpine"
+#version="edge"
+#arch="amd64"
+#name="webserver"
+# e0:3f:49:7f:be:c7 is the built-in NIC's 
+#MAC="e0:3f:49:7f:be:01"
+
+
+setenforce permissive
+dnf install snapd -y
+snap install lxd -y
+snap start lxd
+snap enable lxd
+
+
+#snap services lxd
+#setup network device
+#lxc network create br0 bridge.external_interfaces=enp2s0 ipv4.address=none ipv4.dhcp=false ipv6.address=none ipv6.dhcp=false bridge.hwaddr=${MAC}
+#lxc launch images:${distro}/${version}/${arch} ${name}
+
+
+
+## creating the groups/users for lxd
+## add user to LXD group
+# usermod -a -G lxd ${user}
+# newgrp lxd

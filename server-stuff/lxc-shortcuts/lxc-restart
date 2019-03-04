@@ -1,0 +1,5 @@
+#!/bin/bash
+
+lxc-stop -n ${1}
+lxc-start -n ${1}
+exit 0

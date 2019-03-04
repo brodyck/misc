@@ -1,0 +1,6 @@
+#!/bin/bash
+backDate="$HOSTNAME-$(date +%d-%b-%Y-%H)"
+backDir=/disks/raid1-0/server-backups/${backDate}
+mkdir -p ${backDir}
+rsync -aAXvquKxzP --exclude={"/dev","/proc","/sys","/tmp","/run","/srv","/disks","/mnt","/media","/lost+found"} / ${backDir}
+

@@ -1,0 +1,152 @@
+#!/bin/bash                                                                                           
+set -x
+
+### BEGIN INIT INFO                                                             
+# Provides:          mount-server                              
+# Required-Start:    $network $local_fs $remote_fs $syslog                      
+# Required-Stop:     $remote_fs $syslog                                         
+# Default-Start:     2 3 4 5                                                    
+# Default-Stop:      0 1 6                                                      
+# Short-Description: Mounts dirs                                                
+# Description:       Mounts directories for server                           
+### END INIT INFO            
+
+############################################################                                           
+# All bind-mount fuckery should be left up to the descretion
+#of the container, NOT put in this file                                                                
+# That is, until i figure out if that works or not                                                     
+# EG: provided the containers run this file on boot:
+# if uname -a | grep -q ${containerName} ; then                                                        
+# dammit i wasnt expecting to think of this now, its 3AM.
+############################################################                                          
+PATH=/sbin:/bin:/usr/bin
+home=/disks
+diskname="storage0 raid1-0"
+bindfrom="${disks}/raid1-0/hostroot ${disks}/raid1-0"
+bindto="/root"
+hostBindOp="--rbind -o auto,"
+brtfsOp="-o noatime,autodefrag,compress=lzo,discard,rw"
+ntfsOp="-t ntfs-3g -t ntfs-3g -o noatime,exec,autodefrag,compress=lzo,discard,rw,permissions"
+
+
+start() {
+
+if [[ ${HOSTNAME} = "sayonara" ]] ; then
+    ###    log_begin_msg "Mounting things..."                 
+    btrfs device scan
+    modprobe msr
+    cpufreq-set -c 0 -g userspace
+    cpufreq-set -c 1 -g userspace
+    cpufreq-set -c 2 -g userspace
+    cpufreq-set -c 3 -g userspace
+    cpufreq-set -c 0 -d 2.40Ghz
+    cpufreq-set -c 1 -d 2.40Ghz
+    cpufreq-set -c 2 -d 2.40Ghz
+    cpufreq-set -c 3 -d 2.40Ghz
+    if mount | grep "/var/lib/lxc" ; then : ;
+       else
+           mount ${hostBindOp}ro / /var/lib/lxc/alpine.hostfs
+           mount ${hostBindOp}rw /var/lib/lxc /lxc;
+    fi
+    # physical mounts; all disks should be mounted under /disks/{type[#]}      
+    if mount | grep "storage0" ; then : ;
+    else
+        mount ${ntfsOp} LABEL=storage0 ${home}/storage0
+        mount ${btrfsOp} LABEL=raid1-0 ${home}/raid1-0
+
+           ###for x in ${diskname}; do
+	   ###mount ${mntopts2} LABEL=${x} ${home}/${x};
+	   #done
+	if mount | grep "raid1-0" ; then
+            mount ${hostBindOp}rw /disks/raid1-0/hostroot /root ;
+        fi
+        exit 0;
+    fi;
+elif [[ ${HOSTNAME} = "files" ]] ; then
+    #this was an LXC server that contained my network shares    
+    exit 0;
+
+elif [[ ${HOSTNAME} = "gekko" ]] ; then
+    #gekko is for crypto trading                                                       
+
+    $(node /root/git/gekko/gekko --ui) &
+    exit 0;
+elif [[ ${HOSTNAME} = "bidaya" ]] ; then
+    #seLinux boolians. This is for fedora                                               
+    setsebool samba_export_all_rw on
+    setsebool samba_export_all_ro on
+    setsebool samba_share_fusefs on
+    setsebool samba_share_nfs on
+    setsebool allow_smbd_anon_write on
+    setsebool samba_create_home_dirs on
+    setsebool samba_enable_home_dirs on
+    #These are for LXD
+    if mount | grep "storage0" ; then : ;
+    else	
+	zfs mount storage0
+    fi
+    if mount | grep "raid0-0" ; then : ;
+    else	
+	zfs mount raid0-0
+ #	nohup $(while : ; do /usr/sbin/smartctl -a /dev/sdc | grep Load_Cycle_Count ; sleep 5 && clear; done) &> /dev/null &
+    fi
+    
+    if mount | grep "/shares/thorin" ; then : ;
+    else
+#	mkdir -p /disks/storage0/thorin/Books
+#	mkdir -p /disks/storage0/thorin/Music
+## 	mkdir -p /disks/storage0/thorin/Videos
+#	mkdir -p /shares/thorin/raid0
+#	mkdir -p /shares/thorin/storage
+
+	mount ${hostBindOp}rw /disks/storage0/install-files /disks/storage0/thorin/install-files
+	mount ${hostBindOp}rw /disks/storage0/videos-share /disks/storage0/thorin/videos
+	mount ${hostBindOp}rw /disks/storage0/Music /disks/storage0/thorin/music
+	mount ${hostBindOp}rw /disks/storage0/books /disks/storage0/thorin/books
+	mount ${hostBindOp}rw /disks/storage0/thorin /shares/thorin/storage
+	mount ${hostBindOp}rw /disks/raid0-0/thorin /shares/thorin/raid0	
+        
+    fi
+    nohup $(bash /root/harddrive-spindown 1200 /dev/sdf) &> /dev/null &
+    nohup $(bash /root/harddrive-spindown 1200 /dev/sde) &> /dev/null &
+    nohup $(bash /root/harddrive-spindown 1200 /dev/sdb) &> /dev/null &
+    nohup $(bash /root/harddrive-spindown 1200 /dev/sdc) &> /dev/null &
+    exit 0
+fi
+}
+
+#nodile(){ 	
+#}
+
+stop() {
+###    log_begin_msg "Unmounting things..."                                       
+    if mount | grep hostroot ; then
+	umount /root
+	for x in b d; do
+            umount -f /dev/sd${x}1;
+	done;
+    fi
+}
+restart_mount() {
+    stop
+    start
+}
+
+
+case "$1" in
+    start)
+        start
+	;;
+    stop)
+        stop
+	;;
+    restart)
+	restart
+	;;
+    status)
+###     status_of_proc $DAEMON $NAME                                                                    
+        ;;
+
+esac
+exit 0
+

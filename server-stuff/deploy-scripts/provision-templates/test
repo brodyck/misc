@@ -1,0 +1,42 @@
+#! /bin/bash
+source "/root/deploy-scripts/provision-templates/useful-funcs"
+set -x
+contInfo(){
+    OS='alpine'
+    VERSION='edge'
+    ARCH='amd64'
+    PROVISION='test'
+    CONTNAME="testies"
+    NODES=3
+    MACADDRESS='e0:3f:49:7f:be:c8'
+    TERMEMULATOR='/bin/ash'
+#    USERS=( "brody" "thorin" )
+#    GROUP=( "samba" ) 
+    COMMANDS="echo 'shitfart' > test.txt"
+    CONTNETDEV='eth0'
+    PARENTNET='br0'
+    DEVTYPE="nic"
+    NICTYPE="bridged"
+
+}
+
+# Command called from provision-cont -- Custom stuff will go here -- For ordering
+LXCSetupCommands(){ 
+    internalCommands
+#    externalCommands
+}
+
+# Commands run inside container's shell
+internalCommands(){ 
+    LXCRunCommands ${COMMANDS[@]}
+    #hostContUserSetup ${USERS[@]}
+    #hostContGroupSetup ${GROUP[@]}
+}
+
+# Commands run outside/on LXC
+externalCommands(){ 
+    setIDMaps && lxc restart ${CONTNAME}
+    mountDirs ${MOUNTDIRS[@]}
+    #LXCAddBridgeDevice
+}
+

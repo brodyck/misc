@@ -1,0 +1,17 @@
+#! /bin/sh
+# check if overlays are there
+if mount | grep overlay > /dev/null;
+then
+    # remount if there
+    sudo mount -o remount,exec,rw,async,user -t overlay overlay -o lowerdir=/home/brody/Music,upperdir=/media/brody/storage/brody/Music/,workdir=/media/brody/storage/workdirs/Music/ /home/brody/Music && wait
+    sudo mount -o remount,exec,rw,async,user -t overlay overlay -o lowerdir=/home/brody/Videos,upperdir=/media/brody/storage/brody/Videos/,workdir=/media/brody/storage/workdirs/Videos/ /home/brody/Videos && wait
+    notify-send -t 2000 "teehee" "ilu :3";
+    exit;
+else
+    # mount if not
+    sudo mount -o exec,rw,async,user -t overlay overlay -o lowerdir=/home/brody/Music,upperdir=/media/brody/storage/brody/Music/,workdir=/media/brody/storage/workdirs/Music/ /home/brody/Music && wait
+    sudo mount -o exec,rw,async,user -t overlay overlay -o lowerdir=/home/brody/Videos,upperdir=/media/brody/storage/brody/Videos/,workdir=/media/brody/storage/workdirs/Videos/ /home/brody/Videos && wait
+    notify-send -t 2000 "biskin" "uh? -o-"
+    exit;
+fi
+exit

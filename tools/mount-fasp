@@ -1,0 +1,20 @@
+#! /bin/bash
+set -x
+bidaya="192.168.2.40"
+sshfsOpts="/home/brody/Files-fasp -o IdentityFile=/home/brody/.ssh/id_ed25519-brody,auto_cache"
+
+if mount | grep "Files-fasp" ;
+    then
+        sudo umount "Files-fasp"
+	exit;
+    else
+	if hostname -I | grep "192.168.2.*";
+	then
+            sudo -u 'brody' sshfs root@${bidaya}:/disks ${sshfsOpts},cipher=arcfour,compression=no -p 22
+#            sudo -u 'brody' sshfs root@${bidaya}:/disks ${sshfsOpts} -p 22	    
+            exit;
+	else
+	    sudo -u 'brody' sshfs root@funnyafricashirt.party:/disks ${sshfsOpts} -p 22223
+	    exit;
+	fi
+fi	

@@ -1,0 +1,83 @@
+#! /bin/bash
+set -x
+
+# Sets up a container formore specific usage using scripts which specify what to install + copy over
+
+provContDefineVars(){
+    DEPLOYDIR="/root/deploy-scripts"
+    CREATECONT="${DEPLOYDIR}/create-cont start"
+    DELETECONT="${DEPLOYDIR}/create-cont delete"
+    PROVISIONDIR="${DEPLOYDIR}/provision-scripts"
+    PROVISIONFILE="${PROVISIONDIR}/${PROVISION}"
+}
+
+getContInfo(){
+    if [ -e ${PROVISIONFILE} ]
+    then
+	printf "=====> Provision file exists\n"
+	source $PROVISIONFILE
+	# Following command is command
+	contInfo
+    else
+	printf "=(!)=> Provisioning file doesn't exist, or misspelled\n"
+	ls -l $PROVISIONDIR
+	return 1
+    fi
+}
+
+createContainer(){
+    #create-cont start [OS] [version] [arch] [provision] [base profile]
+    ${CREATECONT} ${OS} ${VERSION} ${ARCH} ${PROVISION} ${PROFILEBASE}
+    
+}
+
+deleteContainer(){
+    provContDefineVars
+    getContInfo
+    #create-cont delete [OS] [version] [arch] [provision] [base profile] 
+    ${DELETECONT} ${OS} ${VERSION} ${ARCH} ${PROVISION} ${PROFILEBASE}\
+}
+
+provision(){
+    lxcCommands
+}
+
+start(){
+    #optionDefine
+    provContDefineVars
+    getContInfo
+    createContainer
+    provision
+}
+
+testProvision(){
+    start
+    start ${1}
+}
+
+########################################################################
+
+PROVISION=${2}
+
+case ${1} in
+     "start"|"make")
+	 printf "\n=====> Starting to make $CONTPROVISION\n"
+	 start
+	 ;;
+     "delete")
+	 printf "=====> Deleting the container $CONTPROVISION\n"
+	 
+	 deleteContainer
+	 ;;
+     "test")
+	 testProvision
+	 exit 0
+     ;;
+     *)
+	 printf "=====> Run using \'setup-cont start [provision]\'\n"
+	 printf "=====> For ease of use, name provisioning file what you want it to do."
+	 printf "=====> List of provision files:"
+	 /bin/bash ls -l $PROVISIONDIR
+     ;;
+     
+esac

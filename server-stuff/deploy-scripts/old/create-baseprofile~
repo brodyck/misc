@@ -1,0 +1,90 @@
+#! /bin/bash
+set -x
+# This is a script to automate my specific setup
+# This creates a .yml file with a specific set of options, then adds it to LXC as a profile
+#
+# Won't give the option to delete a profile because 'lxc profile del profilename' is easy enough
+#
+# Must be given:
+#    a name for the profile
+#    the name of the host bridge device to add (with multiples in quotes)
+#    The name of the device in the container (with multiples in quotes)
+#    A description in quotes
+# Only adds a bridge interface to the default profile. 
+# I did this because you can't directly access the .yml profiles if you 'create'/'edit' them through the 'lxc profile' command, and VIM sucks.
+
+#
+# 
+#
+
+BRIDGENAME=${2} # i want to be able to append new devices
+INTERNALDEVNAME=${3}
+if ${4}
+then
+    DESCRIPTION=${4}
+fi
+
+optionInit(){
+    SYSTEMDDIR="/etc/systemd/network"
+    BRIDGENETWORKFILE="${BRIDGENAME}.network"
+    BRIDGENETWORK="${SYSTEMDDIR}/${BRIDGENETWORKFILE}"
+    YMLFOLDER="/root/log/yml"
+    if [ ! -d ${YMLFOLDER} ]
+    then
+	mkdir -p ${YMLFOLDER}
+    fi
+    MACOFBRDEV=$(sed -n -e 's/^.*MACAddress=//p' ${BRIDGENETWORK})
+
+    # This returns the physical slave of bridge master
+    HWBRDEV=$(ip link | grep -B1 ${MACOFBRDEV} | grep "master ${BRIDGENAME}" | sed 's/://g' | awk '{ print $2 }')
+    
+    PROFILENAME="${HWBRDEV}_${BRIDGENAME}"
+    YMLPROFILE=${YMLFOLDER}/${PROFILENAME}.yml
+    YMLLOGGER=${YMLPROFILE}.$(date +%y.%m.%d.%H.%M)
+    DESCRIPTION=${DESCRIPTION:="${PROFILENAME} using ${BRIDGENAME} as ${INTERNALDEVNAME}"}
+    YMLSTUFF="config: {}
+description: ${DESCRIPTION}
+devices:
+  ${INTERNALDEVNAME}:
+    name: ${INTERNALDEVNAME}
+    nictype: bridged
+    parent: ${BRIDGENAME}
+    type: nic
+name: ${PROFILENAME}
+used_by: []
+"
+}
+createYml(){
+    optionInit
+
+    if ip link show ${BRIDGENAME} 
+    then
+	printf "${YMLSTUFF}" > ${YMLPROFILE}
+	printf "${YMLSTUFF}" > ${YMLLOGGER}
+    else
+	printf "=(!)=> Bridge device doesn\'t exist. Check your spelling.\nip link:\n"
+	ip link show ${BRIDGENAME}
+	exit 1
+    fi
+	
+	
+}
+
+createLXCProfile(){
+    # Must create THEN edit. 
+    lxc profile create ${PROFILENAME}
+    lxc profile edit ${PROFILENAME} < ${YMLPROFILE}
+}
+
+
+case "$1" in
+    'create'|'make')
+        createYml && createLXCProfile
+        printf "\n\n==> Created profile ${PROFILENAME} using ${BRIDGENAME}\n\n"
+        ;;
+    *)
+	printf "\n\n==> create, host dev, cont dev, \'description\'\n\n"
+	printf "\n\n==> To delete a profile, use \'lxc profile delete profilename\'\n\n"
+        exit 1
+        ;;
+esac

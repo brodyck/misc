@@ -1,0 +1,41 @@
+#! /bin/bash
+set -x
+source /root/deploy-scripts/vars
+sourceFile useful-funcs
+sourceFile create-cont-funcs
+
+case ${1} in
+    "make"|"create"|"start")
+	printf "=====> Starting\n"
+	createContDefineVars ${2} ${3} ${4} ${5} ${6}
+	start
+	printf "\n=====> Enter $CONTNAME with \'lxc exec $CONTNAME [terminal]\'\n\n"
+	;;
+    "delete")
+	printf "=====> Deleting\n"
+	createContDefineVars ${2} ${3} ${4} ${5} ${6}
+	delete 
+	;;
+    "defaults")
+	printf "=====> Using defaults\n"
+	createContDefineVars ${2} ${3} ${4} ${5} ${6}
+	start
+	if [ "${2}" == "kill" ]
+	then
+	    delete
+	fi
+	;;
+    "test")
+	printf "\n=====> Doing test, will be deleting afterwards\n"
+	set -x
+	createContDefineVars ${2} ${3} ${4} ${5} ${6}
+	testCont
+	;;
+    *)
+	printf "=(!)=> Syntax is:\n \'create-cont start [OS] [version] [arch] [provision] [base profile]'\n\n"
+	printf "=(!)=> To make default container:\n \'create-cont defaults\'\n\n"
+	printf "=(!)=> To delete default container:\n \'create-cont defaults kill\'\n\n"
+	printf "=(!)=> To make default container, then immedately delete it:\n \'create-cont test ([OS] [version] [arch] [base profile] [purpose])\'\n\n"	
+	return 1
+	;;
+esac

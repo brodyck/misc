@@ -1,0 +1,61 @@
+#! /bin/bash
+#requires amixer, pacmd/pactl rtcwake, notify-send for OSD messages
+# check which bedtime is nearest
+# count down from 5
+# put computer to sleep if I should sleep
+# wake up N seconds
+
+# audio devices
+new_dev=$(sudo find /home -path '*/.*' -prune -o -name "pa-switch.sh" -print)
+
+# time during day
+bedcore=0830
+wakecore=1330
+bednap=1800
+wakenap=2215
+now=$(date +%H%M)
+#you can use any way to open any thing as a buzz duh
+buzzer1='google-chrome http://www.adultswim.com/videos/streams/'
+buzzer2=""
+alarm()
+{
+    notify-send -u low -t 990 "pooter gunna scooter in 5" && sleep 1
+    notify-send -u normal -t 990 "4" && sleep 1
+    notify-send -u normal -t 990 "3" && sleep 1
+    notify-send -u critical -t 990 "2" && sleep 1
+    notify-send -u critical -t 990 "AAAAAAAAAAAAAAAAAAA" && sleep 1
+    sudo rtcwake -m mem -s $(($(date +%s --date=$1)-$(date +%s)))
+    bash $new_dev speakers
+    amixer -D pulse set Master 50%
+    $buzzer1
+    exit;
+}
+
+numCompDo()
+{
+#this takes (n*2)+1 inputs, compares n1 to n1+2 until it runs out, then executes
+#the last one with the value of the second-to-last one as an argument.
+
+#in this case, compares time "now" to a range of times, being sleep1 and wake1, 
+#and if it doesn't return within that loop because "now" is out of range,
+#compares to sleep2 and wake2. Then, executes "alarm" using the 'wake' time as a
+#time to ring. Needlessly complicated, I know.
+input=$1
+i=2 #counter
+
+while [ $i -lt $(($# - 1)) ];	# while counter is less than the number of the last input (6), subtracting 1
+do							#do
+    j=$(($i + 1))			#set counter #2 to the value of counter #1, with 1 added to it
+    if [ $1 -ge ${!i} ] && [ $1 -lt ${!j} ]; 
+       #if the first input is greater than or equal to the value of the expansion of counter #1; and the first input is less than the value of the expansion of counter #2
+    then				#then
+	${!#} ${!j}		#execute the value of the expansion of the last input (6) with the value of the expansion of input 3 as an input to that
+	return 0;		#then return 0
+    fi
+    i=$(($i + 2))			#else, add 2 to counter #1
+done
+}
+
+numCompDo $now $bedcore $wakecore $bednap $wakenap alarm
+notify-send -t 2000 "no :3"
+exit

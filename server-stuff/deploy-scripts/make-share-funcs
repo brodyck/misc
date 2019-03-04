@@ -1,0 +1,101 @@
+#! /bin/bash
+
+setPermissions(){
+    chown -R ${SHAREUSER} ${USERSHAREFINAL}
+    chmod -R 777 ${USERSHAREFINAL}
+}
+
+ZFSdatasetSetup(){
+    local ZFSOPTS="-o dedup=off -o compression=lz4"
+    local ZFSOPTSCOMPRESS="-o relatime=on -o dedup=off -o compression=gzip-8"
+    DATASETS=( "${@}" )
+    for dataset in ${DATASETS[@]}
+    do
+      	if [ ${dataset} == ${COMPRESSDATASET} ]
+        then
+            zfs create ${ZFSOPTSCOMPRESS} ${dataset}
+        else
+            zfs create ${ZFSOPTS} ${dataset}
+        fi
+    done
+}
+
+baseDeviceVars(){
+    STORAGEDIRPATH="/disks/storage0"
+    FASTDIRPATH="/disks/raid0-0"
+}
+
+datasetVars(){
+    STORAGEDATASET="storage0/${SHAREUSER}"
+    COMPRESSDATASET="${STORAGEDATASET}/high-compression"
+    FASTDATASET="raid0-0/${SHAREUSER}"
+    DATASETS=( "${STORAGEDATASET}" "${COMPRESSDATASET}" "${FASTDATASET}" )
+}
+
+folderVars(){
+    STORAGESHARESUBFOLDERS=( "Music" "books" "videos-share" "install-files" )
+    USERSHARESTORAGE="${STORAGEDIRPATH}/${SHAREUSER}"
+    USERSHAREFAST="${FASTDIRPATH}/${SHAREUSER}"
+    USERSHAREFINAL="/shares/${SHAREUSER}"
+    USERSHAREFASTFINAL="${USERSHAREFINAL}/fast"
+    USERSHARESTORAGEFINAL="${USERSHAREFINAL}/storage"
+    USERSHARECOMPRESSFINAL="${USERSHARESTORAGEFINAL}/high-compression"
+    mkdir -p ${USERSHAREFINAL}
+}
+
+setAllVars(){
+    datasetVars
+    baseDeviceVars
+    folderVars
+}
+
+# To unmount anything associated with $SHAREUSER before deletion of folder
+# I'm being a little lazy about this function.
+subfolderUmount(){ 
+    for SUBFOLDER in $(mount | grep "${SHAREUSER}" | awk '{ print $3 }')
+    do
+        umount SUBFOLDER
+    done
+    
+    if mount | grep "${SHAREUSER}"
+    then
+        FORCEUMOUNT="fusermount -uz"
+        for SUBFOLDER in $(mount | grep "${SHAREUSER}" | awk '{ print $3 }')
+        do
+            ${FORCEUMOUNT} ${SUBFOLDER}
+        done
+    fi
+}
+
+subfolderMounts(){
+    local SUBFOLDERS=( "${@}" )
+    for dir in "${SUBFOLDERS[@]}"
+    do
+        local FULLUSERDIRPATH=${USERSHARESTORAGEFINAL}/${dir}
+        local FULLSTORAGEDIRPATH=${STORAGEDIRPATH}/${dir}
+	MOUNTCMD="mount ${SHAREBINDOPTS} ${FULLSTORAGEDIRPATH} ${FULLUSERDIRPATH}"
+	saveCMDs ${MOUNTCMD} "MOUNTCOMMANDS"
+    done
+}
+
+# Saves a command for reuse
+saveCMDs(){
+    COMMANDTYPE=${1}
+    COMMAND=${2}
+    COMMANDARRAY[${COMMANDTYPE}]+="${COMMAND} "
+}
+
+
+# Creates subfolders within the storage dataset of the dir
+subfolderSetup(){ 
+    local SUBFOLDERS=( "${@}" )
+    for dir in "${SUBFOLDERS[@]}"
+    do
+        local FULLUSERDIRPATH=${USERSHARESTORAGEFINAL}/${dir}
+        local FULLSTORAGEDIRPATH=${STORAGEDIRPATH}/${dir}
+        if [ ! -d $FULLUSERDIRPATH ]
+        then
+            mkdir -p ${FULLUSERDIRPATH}
+        fi
+    done
+}

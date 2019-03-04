@@ -1,0 +1,7 @@
+#! /bin/bash
+
+dnf install -y golang debootstrap rsync gpg squashfs-tools
+go get -d -v github.com/lxc/distrobuilder
+$HOME/go/src/github.com/lxc/distrobuilder/ && make
+
+

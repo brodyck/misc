@@ -1,0 +1,61 @@
+#! /bin/bash
+set -x
+source make-share-funcs
+SHAREUSER=${2}
+group="samba" # ${2}
+
+if [ ! ${SHAREUSER} ]; then # just to make sure im not deleting anything
+    exit
+fi
+
+folderVars(){
+    STORAGESHARESUBFOLDERS=( "Music" "books" "videos-share" "install-files" )
+    USERSHARESTORAGE="${STORAGEDIRPATH}/${SHAREUSER}"
+    USERSHAREFAST="${FASTDIRPATH}/${SHAREUSER}"
+    USERSHAREFINAL="/shares/${SHAREUSER}"
+    USERSHAREFASTFINAL="${USERSHAREFINAL}/fast"
+    USERSHARESTORAGEFINAL="${USERSHAREFINAL}/storage"
+    USERSHARECOMPRESSFINAL="${USERSHARESTORAGEFINAL}/high-compression"
+    mkdir -p ${USERSHAREFINAL}
+}
+
+case ${1} in
+    'start')
+
+	SHAREBINDOPTS="--rbind -o auto,rw"
+	datasetVars
+	baseDeviceVars
+	folderVars	
+	adduser ${SHAREUSER} -s /sbin/nologin -G ${group}
+	#adduser ${user} -h /srv/${user} -s /sbin/nologin -G ${group}
+	smbpasswd -a ${SHAREUSER}
+	ZFSdatasetSetup ${DATASETS[@]}
+	zfs set "mountpoint=${USERSHARESTORAGEFINAL}" "${STORAGEDATASET}"
+	zfs set "mountpoint=${USERSHARECOMPRESSFINAL}" "${COMPRESSDATASET}"
+	zfs set "mountpoint=${USERSHAREFASTFINAL}" "${FASTDATASET}"
+	subfolderSetup ${STORAGESHARESUBFOLDERS[@]}
+	subfolderMounts ${STORAGESHARESUBFOLDERS[@]}
+	setPermissions
+	ls -l ${USERSHAREFINAL}/*
+	exit
+	;;
+    'delete')
+	subfolderUmount
+	
+	printf "\nDeleting ${STORAGEDATASET} and ${COMPRESSDATASET}\n"
+	#zfs destroy -r storage0/${SHAREUSER}	
+	printf "\nDeleting ${FASTDATASET}\n"
+	#zfs destroy raid0-0/${SHAREUSER}
+	printf "\nDeleting ${USERSHAREFINAL}"
+	#rm -rf ${USERSHAREFINAL}
+
+	ls -l /shares/${SHAREUSER}/*
+	
+	deluser ${SHAREUSER}
+	smbpasswd -x ${SHAREUSER}
+	;;
+esac
+
+
+
+

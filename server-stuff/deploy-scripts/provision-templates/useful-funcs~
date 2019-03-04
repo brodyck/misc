@@ -1,0 +1,215 @@
+#! /bin/bash
+#set -x
+# This has to be sourced from a provisioning script
+
+######################################################################
+# For running commands or COMMANDS[@]
+######################################################################
+
+# Runs every command passed to it seperately. Use quotes.
+LXCRunCommands(){ 
+    for thing in "${COMMANDS[@]}"
+    do
+        execInCont "${thing}"
+    done
+}
+
+# Runs command passed to it using term. emu. defined in config file
+execInCont(){ 
+    lxc exec ${CONTNAME} -- ${TERMEMULATOR} -c "${@}"
+}
+
+######################################################################
+# For setting ID maps in LXC -- Primarily for mounting folders/devs
+######################################################################
+
+# Grabs IDs of USERS/GROUPS, puts them in a string, and maps them in the container        
+setIDMaps(){ 
+    UIDMaps
+    GIDMaps
+    printf "${FORMATTEDIDS[@]}" | lxc config set ${CONTNAME} raw.idmap -
+}
+
+######################################################################
+# For finding and formatting ID maps to be sent to the lxc config
+######################################################################
+
+# Gets UIDs Need to reboot cont. after running
+UIDMaps(){ 
+    local NAMES=( ${USERS[@]} )
+    local TYPE='uid'
+    for name in ${NAMES[@]}
+    do
+        getUID ${name}
+        formatIDMaps ${TYPE}
+    done
+}
+
+# Gets GIDs for groups. Need to reboot cont. after running
+GIDMaps(){ 
+    local NAMES=( ${USERS[@]} ${GROUP[@]} )
+    local TYPE='gid'
+    for name in ${NAMES[@]}
+    do
+        getGID ${name}
+	formatIDMaps ${TYPE}
+    done
+}
+
+formatIDMaps(){ # Sets proper formatting for dumbass raw.idmap key in LXD's lxc command
+    case ${1} in
+        "gid")
+            FORMATTEDIDS+="gid ${MATCHEDGIDS[-1]}\n"
+            ;;
+        "uid")
+            FORMATTEDIDS+="uid ${MATCHEDUIDS[-1]}\n"
+            ;;
+    esac
+}
+
+######################################################################
+# For getting & matching the UID/GID of groups/users in host/cont
+######################################################################
+
+# Gets uid of 'user' passed to it in cont & host
+getUID(){ 
+    local getuid="grep /etc/passwd -e ${1} | sed 's/:/\n/g' | head -n 3 | tail -n 1"
+    HOSTUID=$(bash -c "${getuid}")
+    CONTUID=$(execInCont "${getuid}")
+    MATCHEDUIDS+=( "${HOSTUID} ${CONTUID}" )
+}
+
+# Gets gid of 'group' passed to it in cont & host
+getGID(){                                             
+    local getgid="grep /etc/group -e ${1} | sed 's/:/\n/g' | head -n 3 | tail -n 1"
+    HOSTGID=$(bash -c "${getgid}")
+    CONTGID=$(execInCont "${getgid}")
+    MATCHEDGIDS+=( "${HOSTGID} ${CONTGID}" )
+}
+
+######################################################################
+# For setting up users/groups
+######################################################################
+
+# Ensure users exist in host &/or cont
+userSetup(){ 
+    local NAMES=( "${@}" )
+    for name in ${NAMES[@]}
+    do
+        adduser ${name}
+    done
+}
+
+contUserSetup(){ 
+    local NAMES=( "${@}" )
+    for name in ${NAMES[@]}
+    do
+	execInCont "adduser ${name}"
+    done
+}
+
+hostContUserSetup(){ 
+    local NAMES=( "${@}" )
+    userSetup "${NAMES[@]}"
+    contUserSetup "${NAMES[@]}"
+}
+
+# Ensure groups exist in host &/or cont
+groupSetup(){ 
+    local NAMES=( "${@}" )
+    for name in ${NAMES[@]}
+    do
+        addgroup ${name}
+    done
+}
+
+contGroupSetup(){ 
+    local NAMES=( "${@}" )
+    for name in ${NAMES[@]}
+    do
+	execInCont "addgroup ${name}"
+    done
+}
+
+hostContGroupSetup(){ 
+    local NAMES=( "${@}" )
+    groupSetup "${NAMES[@]}"
+    contGroupSetup "${NAMES[@]}"
+}
+
+######################################################################
+# For setting up mounts (You will need ids mapped)
+######################################################################
+
+# Recursively mounts dirs in array MOUNTDIRS -- check your permissions
+mountDirs(){ 
+    local NAMES=( "${@}")
+    for name in "${NAMES[@]}"
+    do
+	# Remove / from path to be used as name
+        local DISKDEVNAME=$(printf ${name} | sed 's/\// /g' | awk '{ print $1 }') 
+        lxc config device add "${CONTNAME}" "${DISKDEVNAME}" "disk" "source=${name}" "path=${name}" "recursive=true"
+        execInCont "mount | grep ${name}"
+    done
+}
+
+######################################################################
+# For file input/output in container
+######################################################################
+
+# Pushing a file from a host to an LXC container; list of files into single folder
+pushToContainer(){
+    local FILE=${1}
+    local DIR=${2}
+    lxc file push "${FILE}" "${CONTNAME}${DIR}"
+}
+
+#SSHFileTransfer(){}
+
+# Creating a startup script to run at boot
+# createStartup(){}
+
+######################################################################
+# Bridging for cont
+######################################################################
+
+checkForHostBridge(){
+    if ip link show ${PARENTNET}
+    then :
+    else
+        printf "=(!)=> Bridge device doesn\'t exist. Check your spelling.\n"
+        ip link show ${PARENTNET}
+	exit 1
+    fi
+}
+
+LXCAddBridgeDevice(){
+    checkForHostBridge ${PARENTNET}
+    lxc profile device add ${CONTNAME} ${CONTNETDEV} ${DEVTYPE} "nictype=${NICTYPE}" "parent=${PARENTNET}"
+}
+
+LXCCreateProfile(){
+    lxc profile create ${CONTNAME}
+}
+
+
+LXCAddRootDisk(){
+    lxc profile device add ${CONTNAME} "root" "disk" "path=/" "pool=lxd"
+}
+
+LXCProfileSetup(){
+    LXCCreateProfile
+    LXCAddBridgeDevice
+    LXCAddRootDisk
+}
+
+LXCCluster(){
+
+    i=0
+    while [[ $NODES -gt $i ]]
+    do
+	$provcont start ${1}	
+	i=$(( i + 1 ))
+    done
+
+}
