@@ -1,6 +1,6 @@
 Finally updating this backup of my scripts.
 
-See also:
+11;rgb:4176/4009/3bc2See also:
 - https://github.com/brodyck/harddrive-lcc
   - Script that stops any hard drive head from parking for a specified amount of time.
 
@@ -39,11 +39,11 @@ See also:
 - #### [pa-1click](https://github.com/brodyck/misc/blob/master/pa-1click "pa-1click")
   - Toggle rotates between my audio output devices; good to set to keyboard shortcut
   - Sets audio levels so speakers and ears don't blow out
-  - Has some error-correction features so if something weird is going on with my audio, defaults to set everything to laptop speakers
+  - Has some error-correction so if something weird happens, defaults everything to laptop speakers
 
 - #### [audio-passthrough](https://github.com/brodyck/misc/blob/master/audio-passthrough "audio-passthrough")
   - Toggle that takes input from the audio-in on my C-Media usb audio card.
-  - Loads PulseAudio 'module-loopback' and sets a source to a sink
+  - Loads PulseAudio 'module-loopback' and sets a source to the current sink
 
 - #### [bidaya](https://github.com/brodyck/misc/blob/master/tools/bidaya "bidaya") & [sayonara](https://github.com/brodyck/misc/blob/master/tools/sayonara "sayonara")
   - SSHes me into my servers, bidaya & sayonara
