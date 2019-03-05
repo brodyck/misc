@@ -15,7 +15,7 @@ See also:
   - Main programs in the server are ZFS, LXC/LXD, Vagrant, Docker; it runs Fedora
   - Soon to be full of Vagrant, Kubernetes, Dockerfiles, Ansible and Salt configs
   - [update-vagrantlxd](https://github.com/brodyck/misc/tree/master/server-stuff/update-vagrantlxd "update-vagrantlxd"), and its scarier twin, [update-vagrantlxd-ohno](https://github.com/brodyck/misc/tree/master/server-stuff/update-vagrantlxd-ohno "update-vagrantlxd-ohno")
-  - Script that was of control sleeps here: [deploy-scripts](https://github.com/brodyck/misc/tree/master/server-stuff/deploy-scripts "deploy-scripts")
+  - Script that was out of control sleeps here: [deploy-scripts](https://github.com/brodyck/misc/tree/master/server-stuff/deploy-scripts "deploy-scripts")
     - Creates a bridge network device with systemd
     - Uses a config file to provision an LXC container
     - Config file specifies permissions of dirs, what to install, any other settings
