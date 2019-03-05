@@ -1,5 +1,5 @@
 #! /bin/bash
-11;rgb:4176/4009/3bc2# set -x
+# set -x
 #./install-vagrant && wait
 vagrant plugin install vagrant-lxd
 mkdir -p /root/.config/lxc
