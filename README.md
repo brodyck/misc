@@ -64,6 +64,11 @@ See also:
 
 ### Neat stuff:
 
+- #### [phone-thing](https://github.com/brodyck/misc/blob/master/phone-thing "phone-thing")
+  - 2 way audio communication between my server and my laptop that I assigned keyboad shortcuts
+  - Wrote to freak out my roommate while I was on vacation
+  - Didn't get to use it
+
 - #### [touchtogg](https://github.com/brodyck/misc/blob/master/outofdate/touchtogg "touchtogg")  
   - My x201t had bad ghost touching on the screen. Toggles on/off. Can lose the xinput device under unknown circumstances.
 
@@ -75,7 +80,3 @@ See also:
   - First thing I wrote since doing C in college in 2013
   - Don't work anymore because pm-suspend-hybrid isn't used anymore. Don't know why they did that.
 
-- #### [phone-thing](https://github.com/brodyck/misc/blob/master/phone-thing "phone-thing")
-  - 2 way audio communication between my server and my laptop that I assigned keyboad shortcuts
-  - Wrote to freak out my roommate while I was on vacation
-  - Didn't get to use it
