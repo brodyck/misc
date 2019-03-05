@@ -43,8 +43,7 @@ See also:
   - Toggle that takes input from the audio-in on my C-Media usb audio card. Loads PulseAudio 'module-loopback' and sets a source to a sink. The sink is the current running audio-output device.
 
 - #### [bidaya](https://github.com/brodyck/misc/blob/master/tools/bidaya "bidaya") & [sayonara](https://github.com/brodyck/misc/blob/master/tools/sayonara "sayonara")
-  - SSHes me into my servers, bidaya & sayonara, using my ed25519 key on my laptop.
-  - My servers don't take passwords if they're on the internet
+  - SSHes me into my servers, bidaya & sayonara
 
 - #### [mount-fasp](https://github.com/brodyck/misc/blob/master/tools/mount-fasp "mount-fasp")
   - Mounts my server using SSHFS over the internet or locally
