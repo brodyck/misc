@@ -1,6 +1,6 @@
 Finally updating this backup of my scripts.
 
-11;rgb:4176/4009/3bc2See also:
+See also:
 - https://github.com/brodyck/harddrive-lcc
   - Script that stops any hard drive head from parking for a specified amount of time.
 
