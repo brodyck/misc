@@ -40,7 +40,7 @@ See also:
   - Set to ctrl-super-a
 
 - #### [audio-passthrough](https://github.com/brodyck/misc/blob/master/audio-passthrough "audio-passthrough")
-  - Toggle that takes input from the audio-in on my C-Media usb audio card. Loads PulseAudio 'module-loopback' and sets a source to a sink. The sink is the current running audio-output device. I use this when I need to hear my Nintendo Switch. 
+  - Toggle that takes input from the audio-in on my C-Media usb audio card. Loads PulseAudio 'module-loopback' and sets a source to a sink. The sink is the current running audio-output device.
 
 - #### [bidaya](https://github.com/brodyck/misc/blob/master/tools/bidaya "bidaya") & [sayonara](https://github.com/brodyck/misc/blob/master/tools/sayonara "sayonara")
   - SSHes me into my servers, bidaya & sayonara, using my ed25519 key on my laptop.
@@ -59,6 +59,7 @@ See also:
     - sreboot sets grub to boot into bios/uefi
     - wreboot sets grub to boot Windows
 
+---
 
 ### Stuff I think is interesting:
 
