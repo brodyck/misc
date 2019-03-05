@@ -35,14 +35,13 @@ See also:
 ### In the [Tools](https://github.com/brodyck/misc/blob/master/tools "tools") folder:
 
 - #### [scrots](https://github.com/brodyck/misc/blob/master/tools/scrots "scrots")
-  - My overcomplicated 'scrot -s' alias.
+  - Overcomplicated 'scrot -s' alias.
   - Finds what user is taking said screenshot (will find who ran 'sudo su'), puts them in screenshot folder with date and proper permissions.
 
 - #### [pa-1click](https://github.com/brodyck/misc/blob/master/pa-1click "pa-1click")
-  - Toggle rotates between my audio output devices
+  - Toggle rotates between my audio output devices; good to set to keyboard shortcut
   - Sets audio levels so speakers and ears don't blow out
   - Has some error-correction features so if something weird is going on with my audio, defaults to set everything to laptop speakers
-  - Set to ctrl-super-a
 
 - #### [audio-passthrough](https://github.com/brodyck/misc/blob/master/audio-passthrough "audio-passthrough")
   - Toggle that takes input from the audio-in on my C-Media usb audio card.
@@ -77,12 +76,10 @@ See also:
 
 - #### [get-up-friendo](https://github.com/brodyck/misc/blob/master/outofdate/get-up-friendo "get-up-friendo") & [get-up-frienderino](https://github.com/brodyck/misc/blob/master/outofdate/get-up-frienderino "get-up-friendorino")  
   - Alarm scripts I made for helping with a bi-phasic sleep schedule I had doing night-shifts as a cook
-  - I almost always have a non-sensically hard to read version of scripts
   - First thing I wrote since doing C in college in 2013
   - Don't work anymore because pm-suspend-hybrid isn't used anymore. Don't know why they did that.
 
 - #### [phone-thing](https://github.com/brodyck/misc/blob/master/phone-thing "phone-thing")
   - 2 way audio communication between my server and my laptop that I assigned keyboad shortcuts
   - Wrote to freak out my roommate while I was on vacation
-  - They work, but my server at the time was a laptop and it had over-heated and turned off
   - Didn't get to use it
