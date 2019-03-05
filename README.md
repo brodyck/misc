@@ -12,21 +12,21 @@ See also:
 
 ### Some of my folders:
 
-- #### 1. [server-stuff](https://github.com/brodyck/scripts/tree/master/server-stuff "server-stuff")
+- #### 1. [server-stuff](https://github.com/brodyck/misc/tree/master/server-stuff "server-stuff")
   - Soon to be full of Vagrant, Kubernetes, Ansible and Salt configs
   - Main programs in my home-server are ZFS, LXC/LXD, Vagrant, Docker
-  - [update-vagrantlxd](https://github.com/brodyck/scripts/tree/master/server-stuff/update-vagrantlxd "update-vagrantlxd"), and its scarier twin, [update-vagrantlxd-ohno](https://github.com/brodyck/scripts/tree/master/server-stuff/update-vagrantlxd-ohno "update-vagrantlxd-ohno")
-  - A script that I wrote that got out of control sleeps here: [deploy-scripts](https://github.com/brodyck/scripts/tree/master/server-stuff/deploy-scripts "deploy-scripts")
+  - [update-vagrantlxd](https://github.com/brodyck/misc/tree/master/server-stuff/update-vagrantlxd "update-vagrantlxd"), and its scarier twin, [update-vagrantlxd-ohno](https://github.com/brodyck/misc/tree/master/server-stuff/update-vagrantlxd-ohno "update-vagrantlxd-ohno")
+  - A script that I wrote that got out of control sleeps here: [deploy-scripts](https://github.com/brodyck/misc/tree/master/server-stuff/deploy-scripts "deploy-scripts")
     - Creates a bridge network device with systemd
     - Uses a config file to provision an LXC container
     - Config file specifies permissions of dirs, what to install, any other settings
 
-- #### 2. [virtualization-stuff](https://github.com/brodyck/scripts/tree/master/virtualization-stuff "virtualization-stuff")
+- #### 2. [virtualization-stuff](https://github.com/brodyck/misc/tree/master/virtualization-stuff "virtualization-stuff")
   - Uses QEMU, Libvert, freeRDP2, and lots of stuff in the /dev directory
   - Scripts I have been using to test passing through parts of my laptop, specifically GPU, to a Windows VM
   - Lots of small things and research need to be done
 
-- #### 3. [setup-stuff](https://github.com/brodyck/scripts/tree/master/setup-stuff "setup-stuff")  
+- #### 3. [setup-stuff](https://github.com/brodyck/misc/tree/master/setup-stuff "setup-stuff")  
   - Scripts I use to set up my desktop for every day usage
   - **[mount-home](https://github.com/brodyck/misc/blob/master/setup-stuff/mount-home "mount-home")** sets routes and performs certain actions depending on what network my laptop/given host has booted onto
 
