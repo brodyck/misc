@@ -51,7 +51,7 @@ See also:
 
 - #### [supls](https://github.com/brodyck/misc/blob/master/tools/supls "supls")
   - Most used script  
-  - ***!! WARNING: very complicated. Not for small brains !!***
+  - ***!! WARNING: very complicated !!***
   
 - #### *reboot scripts
   - Sets default boot in grub
