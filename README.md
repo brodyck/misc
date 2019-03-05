@@ -17,30 +17,37 @@ See also:
   - Main programs in my home-server are ZFS, LXC/LXD, Vagrant, Docker
   - [update-vagrantlxd](https://github.com/brodyck/scripts/tree/master/server-stuff/update-vagrantlxd "update-vagrantlxd"), and its scarier twin, [update-vagrantlxd-ohno](https://github.com/brodyck/scripts/tree/master/server-stuff/update-vagrantlxd-ohno "update-vagrantlxd-ohno")
   - A script that I wrote that got out of control sleeps here: [deploy-scripts](https://github.com/brodyck/scripts/tree/master/server-stuff/deploy-scripts "deploy-scripts")
-    - Creates a bridge network device with systemd; uses a config file to provision an LXC container; config file specifies permissions of dirs, what to install, any other settings
+    - Creates a bridge network device with systemd
+    - Uses a config file to provision an LXC container
+    - Config file specifies permissions of dirs, what to install, any other settings
 
 - #### 2. [virtualization-stuff](https://github.com/brodyck/scripts/tree/master/virtualization-stuff "virtualization-stuff")
   - Uses QEMU, Libvert, freeRDP2, and lots of stuff in the /dev directory
-  - Scripts I have been using to test passing through parts of my laptop, specifically GPU, to a Windows VM.
-  - Lots of small things and research need to be done.
+  - Scripts I have been using to test passing through parts of my laptop, specifically GPU, to a Windows VM
+  - Lots of small things and research need to be done
 
 - #### 3. [setup-stuff](https://github.com/brodyck/scripts/tree/master/setup-stuff "setup-stuff")  
-  - Scripts I use to set up my desktop for every day usage.
-  - **[mount-home](https://github.com/brodyck/misc/blob/master/setup-stuff/mount-home "mount-home")** sets routes and performs certain actions depending on what network my laptop/given host has booted onto.
+  - Scripts I use to set up my desktop for every day usage
+  - **[mount-home](https://github.com/brodyck/misc/blob/master/setup-stuff/mount-home "mount-home")** sets routes and performs certain actions depending on what network my laptop/given host has booted onto
 
 ---
 
 ### In the [Tools](https://github.com/brodyck/misc/blob/master/tools "tools") folder:
 
 - #### [scrots](https://github.com/brodyck/misc/blob/master/tools/scrots "scrots")
-  - My overcomplicated 'scrot -s' alias. Takes screenshots, finds what user is taking said screenshot (will find who ran 'sudo su'), puts them in screenshot folder with date and proper permissions.
+  - My overcomplicated 'scrot -s' alias.
+  - Finds what user is taking said screenshot (will find who ran 'sudo su'), puts them in screenshot folder with date and proper permissions.
 
 - #### [pa-1click](https://github.com/brodyck/misc/blob/master/pa-1click "pa-1click")
-  - Toggle rotates between my audio output devices. Sets audio levels so speakers and ears don't blow out. Has some error-correction features so if something weird is going on with my audio, defaults to set everything to laptop speakers.
+  - Toggle rotates between my audio output devices
+  - Sets audio levels so speakers and ears don't blow out
+  - Has some error-correction features so if something weird is going on with my audio, defaults to set everything to laptop speakers
   - Set to ctrl-super-a
 
 - #### [audio-passthrough](https://github.com/brodyck/misc/blob/master/audio-passthrough "audio-passthrough")
-  - Toggle that takes input from the audio-in on my C-Media usb audio card. Loads PulseAudio 'module-loopback' and sets a source to a sink. The sink is the current running audio-output device.
+  - Toggle that takes input from the audio-in on my C-Media usb audio card.
+  - Loads PulseAudio 'module-loopback' and sets a source to a sink
+  - The sink is the current running audio-output device.
 
 - #### [bidaya](https://github.com/brodyck/misc/blob/master/tools/bidaya "bidaya") & [sayonara](https://github.com/brodyck/misc/blob/master/tools/sayonara "sayonara")
   - SSHes me into my servers, bidaya & sayonara
@@ -77,4 +84,5 @@ See also:
 - #### [phone-thing](https://github.com/brodyck/misc/blob/master/phone-thing "phone-thing")
   - 2 way audio communication between my server and my laptop that I assigned keyboad shortcuts
   - Wrote to freak out my roommate while I was on vacation
-  - They work, but my server at the time was a laptop and it had over-heated and turned off; didn't get to use it
+  - They work, but my server at the time was a laptop and it had over-heated and turned off
+  - Didn't get to use it
