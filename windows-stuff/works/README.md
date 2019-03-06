@@ -8,7 +8,7 @@ way-ward
 adjective
 difficult to control or predict because of unusual or perverse behavior.
 ```
-  - ***perverse***
+    - ***perverse***
 
 <br/>  
 
@@ -16,6 +16,8 @@ difficult to control or predict because of unusual or perverse behavior.
   - Mount script mounts my dirs like I do in linux.
   - Unmounts my HDDs before hybernation/reboots so that they don't get write-locked under linux
 <br/>
+
 - The password thing is used for creating tasks in windows. I only use it for VMs when I'm testing things.
 <br/>
+
 - The other VLC thing is just for the other side of the stream. Sent to certain friends.
