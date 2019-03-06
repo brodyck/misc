@@ -6,7 +6,7 @@ My Windows scripts. I try to avoid doing this. Sometimes it's necessary.
 way-ward
 /ˈwāwərd/
 adjective
-difficult to control or predict because of unusual or perverse behavior.
+difficult to control or predict because of unusual or **perverse** behavior.
 ```  
 <br/>
 - [mount-windows.bat](https://github.com/brodyck/scripts/blob/master/windows-stuff/works/mount-windows.bat "mount-windows.bat")
