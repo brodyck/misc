@@ -1,0 +1,150 @@
+#! /bin/bash
+set -x
+### BEGIN INIT INFO
+# Provides:          mount-home
+# Required-Start:    $network $local_fs $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Mounts home 
+# Description:       Moutns home directories + server
+### END INIT INFO
+PATH=/sbin:/bin:/usr/bin
+NAME=mount-home
+DESCRIPTION="Mounts home dirs"
+COMMAND=mount-home
+USER=root
+user=brody
+home=/home/brody
+storageMount="/home/brody/storage"
+raid0Mount="/home/brody/raid0"
+storageUrl='//192.168.2.40/storage/' 
+raid0Url='//192.168.2.40/raid0/'
+homeOpts=" -o user=brody,pass=dyck,dom=SWOMP,uid=${user},vers=2.1"
+uid="uid=$(id -u brody)"
+gid="gid=$(id -g brody)"
+fileMask="umask=002" #umask
+# mount -t ntfs-3g -o users,suid,exec,permissions,user_id=1000,group_id=1000,umask=0 /dev/sda7 
+ntfsOps="-o noatime,suid,exec,${uid},${gid},${fileMask},rw,permissions"
+start(){
+    log_begin_msg "Mounting things..."
+    if lsblk | grep sda7 ; then
+	mntDest=/home/brody/
+	mntStart=/mnt/home/
+        mownt="mount -l --bind ${mntStart}"
+        mount -t ntfs-3g ${ntfsOps} /dev/sda7 $mntStart
+#       mount -t ntfs-3g LABEL=windows /mnt/windows
+        ${mownt}Desktop ${mntDest}Desktop
+        ${mownt}Documents ${mntDest}Documents
+        ${mownt}Downloads ${mntDest}Downloads
+        ${mownt}Pictures ${mntDest}Pictures
+        ${mownt}Videos ${mntDest}Videos
+        ${mownt}Music ${mntDest}Music
+        ${mownt}Emulation ${mntDest}Emulation
+        ${mownt}Installers ${mntDest}Installers
+        ${mownt}Projects ${mntDest}Projects;
+    fi
+    if hostname -I | grep -q 192.168.2.* ; then
+	finalOpts="${homeOpts}"
+	mountNetwork="mount -t cifs${finalOpts}"
+       ${mountNetwork} ${storageUrl} ${storageMount}
+       ${mountNetwork} ${raid0Url} ${raid0Mount};
+    fi
+    startSynergy
+}
+
+stopSynergy(){
+    killall /usr/bin/synergyc
+}
+
+startSynergy(){
+    if hostname -I | grep -q 10.69.201.* ; then
+	route add -net default gw 10.69.201.1 netmask 0.0.0.0 dev wlp3s0 metric 50
+	route del -net default gw 10.69.201.1 netmask 0.0.0.0 dev wlp3s0 metric 60
+	ip addr add 192.168.0.3/24 dev enx0050b621aa4a
+	ip addr add 192.168.0.3/24 dev enxa0cec8c66b7d	
+	sudo -u brody /usr/bin/synergyc -n `hostname -s` -d INFO --enable-crypto 192.168.0.2
+    fi
+}
+
+restartSynergy(){
+    stopSynergy
+    startSynergy
+}
+
+stop(){
+    log_begin_msg "Unmounting things..."
+    killall synergy-config
+    killall synergy-service
+    umnt="umount /home/brody/"
+    umnt2="umount /mnt/home"
+    fumnt="fusermount -uz /home/brody/"
+    storageMount="/home/brody/storage"
+    raid0Mount="/home/brody/raid0"
+    if mount | grep -q // ; then
+	umount ${filesMount}
+	umount ${raid1Mount}
+	
+	if mount | grep -q server ; then
+            fusermount -uz ${storageMount}
+	    fusermount -uz ${raid0Mount}
+        fi;
+    fi
+    
+    if mount | grep -q windows ; then
+	umount /mnt/windows
+	if mount | grep -q windows ; then
+	    fusermount -uz /mnt/windows;
+	fi;
+    fi
+	    
+    if mount | grep -q /home/brody ; then
+        ${umnt}Desktop
+        ${umnt}Documents
+        ${umnt}Downloads
+        ${umnt}Installers
+        ${umnt}Projects
+        ${umnt}Music
+        ${umnt}Videos
+        ${umnt}Pictures
+        ${umnt}Emulation
+        ${umnt2}
+        if mount | grep -q /home/brody ; then
+            ${fumnt}Desktop
+            ${fumnt}Downloads
+            ${fumnt}Documents
+            ${fumnt}Installers
+            ${fumnt}Projects
+            ${fumnt}Music
+            ${fumnt}Videos
+            ${fumnt}Pictures
+            ${fumnt}Emulation
+	    ${umnt2};
+        fi;
+    fi
+}
+
+restart(){
+    stop
+    start
+}
+
+case "$1" in
+    start)
+	start
+	;;
+    stop)
+	stop
+	;;
+    restart)
+	restart
+	;;
+    "restartSynergy")
+	restartSynergy
+	;;
+    status)
+	status_of_proc $DAEMON $NAME
+	;;
+	
+esac
+exit 0
