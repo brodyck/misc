@@ -14,7 +14,9 @@ difficult to control or predict because of unusual or perverse behavior.
 - [mount-windows.bat](https://github.com/brodyck/scripts/blob/master/windows-stuff/works/mount-windows.bat "mount-windows.bat")
   - Mount script mounts my dirs like I do in linux.
   - Unmounts my HDDs before hybernation/reboots so that they don't get write-locked under linux
-<br>  
+<br/>
+
 - The password thing is used for creating tasks in windows. I only use it for VMs when I'm testing things.
-<br/>  
+<br/>
+
 - The other VLC thing is just for the other side of the stream. Sent to certain friends.
