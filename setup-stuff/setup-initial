@@ -187,7 +187,9 @@ instSoftware(){
 			  freerdp2-x11 \
 	                  xclip \
 			  linphone \
-			  peek\
+			  peek \
+			  texlive-latex-base \
+			  texlive-latex-extras
 	&& wait
 #steam \
 #rambox \

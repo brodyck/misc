@@ -1,4 +1,4 @@
-#! /bin/bash
+#b:1;5202;0c#! /bin/bash
 #set -x
 # this script sets how long a drive takes to park its head and spin down.
 # Goal is to have 'green' drives not get so many LCCs while balancing power-on hours.
