@@ -13,7 +13,7 @@ set -x
 
 ############################################################                                           
 # All bind-mount fuckery should be left up to the descretion
-#of the container, NOT put in this file                                                                
+# of the container, NOT put in this file                                                                
 # That is, until i figure out if that works or not                                                     
 # EG: provided the containers run this file on boot:
 # if uname -a | grep -q ${containerName} ; then                                                        

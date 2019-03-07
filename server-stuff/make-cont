@@ -1,0 +1,346 @@
+#! /bin/bash
+#set -x
+
+####################################################################
+####################################################################
+declare()
+{
+OS=${OS:='alpine'}
+arch=${arch:='x86_64'}
+hostname=${hostname:='test'}
+
+# "hostfs" MUST be within the root of the default-dir stated in /etc/lxc.conf; can be named anything
+# "contfs" MUST be within root of the "contd" stated below; name MUST be 'delta0'
+# "workd" MUST be within root of the "contd" stated below; name MUST be 'olwork' 
+# further organization must be done with symlinks OR rbind mounts
+# When mounting device in filesystem, create the directory first
+
+lxcd=${lxcd:='/var/lib/lxc'}
+conflnk=${conflnk:="${lxcd}/${hostname}.conf"}
+contd=${contd:="${lxcd}/${hostname}"}
+hostfs=${hostfs:="${lxcd}/${OS}.hostfs"}
+contfs=${contfs:="${contd}/delta0"}
+workd=${workd:="${contd}/olwork"}
+conf=${conf:="${contd}/config"}
+rootfs=${rootfs:="overlayfs:${hostfs}:${contfs}"}
+
+# here's so they share the host /root and can all make changes to things in there
+
+
+# Inside container; have to generate/delete some specific files for use within the 
+# container, so that internet and ssh and stuff works without conflict from the 
+# hostfs's files.
+# It seems as though some of this might not be necessary, but 
+# I'm doing it for completeness.
+lxc_etc=${lxc_etc:="${contfs}/etc"}
+lxc_interfaces=${lxc_interfaces:="${lxc_etc}/network/interfaces"}
+lxc_network=${lxc_network:="${lxc_etc}/network"}
+lxc_ssh=${lxc_ssh:="${lxc_etc}/ssh"}
+lxc_hostname=${lxc_hostname:="${lxc_etc}/hostname"}
+lxc_hosts=${lxc_hosts:="${lxc_etc}/hosts"}
+
+host_etc=${host_etc:="${hostfs}/etc"}
+host_interfaces=${host_interfaces:="${host_etc}/network/interfaces"}
+host_network=${host_network:="${host_etc}/network"}
+host_ssh=${host_ssh:="${host_etc}/ssh"}
+host_hostname=${host_hostname:="${host_etc}/hostname"}
+host_hosts=${host_hosts:="${host_etc}/hosts"}
+
+# Container options
+include=${include:="/usr/share/lxc/config/${OS}.common.conf"}
+mount=${mount:="${lxcd}/fstab.${hostname}"}
+mountauto=${mountauto:='proc sys cgroup'}
+rootfsback=${rootfsback:='overlayfs'}
+# ipv6gate=${ipv6gate:='auto'}
+# ipv6=${ipv6:='i dunno lol'}
+ipv4gate=${ipv4gate:='auto'} 
+ipv4=${ipv4:='0.0.0.0/24'} 
+netmtu=${netmtu:='1500'} 
+startauto=${startauto:='1'} 
+netname=${netname:='eth0'} 
+netlink=${netlink:='br0'} 
+netflag=${netflag:='up'} 
+nettype=${nettype:='veth'} 
+undotest=${undotest:='yes'} 
+attach=${attach:='no'} 
+start=${start:='no'} 
+rcrunlvl=${rcrunlvl:='default'} 
+rc=${rc:="lxc.${hostname} ${rcrunlvl}"} 
+init=${init:="/etc/init.d/lxc.${hostname}"} 
+n=${n:="-n ${hostname}"} 
+f=${f:="-f ${conf}"} 
+t=${t:="-t ${OS}"} 
+o=${o:="-o ${contd}/${hostname}-create.log"}
+l=${l:="-l ERROR"}
+debug=${debug:='n'}
+lxccreate="lxc-create ${l} ${o} ${n} ${f} ${t}"
+
+# errors
+e318=${e318:="lxc-create: tools/lxc_create.c: main: 318 Error creating container $hostname"}
+exists=${exists:="Container already exists"}
+}
+
+intake()
+{
+## New options all go here
+
+printf '=====> Hostname [test]: '
+read -r hostname
+
+printf '=====> Template [alpine]: '
+read -r OS
+
+until debugit; do : ; done
+
+declare
+}
+
+makeconf()
+{
+printf %s "
+lxc.arch = ${arch}
+lxc.include = ${include}
+lxc.utsname = ${hostname}
+lxc.network.type = ${nettype}
+lxc.network.flags = ${netflag}
+lxc.network.link = ${netlink}
+lxc.network.name = ${netname}
+lxc.start.auto = ${startauto}
+lxc.network.mtu = ${netmtu}
+lxc.network.ipv4 = ${ipv4}
+lxc.network.ipv4.gateway = ${ipv4gate}
+# lxc.network.ipv6 = ${ipv6}
+# lxc.network.ipv6.gateway = ${ipv6gate}
+#lxc.mount.auto = ${mountauto}
+lxc.rootfs = ${rootfs}
+#lxc.mount = ${mount}
+lxc.mount.entry = /disks/raid1/hostroot root none bind 0 0
+# lxc.rootfs.options =
+lxc.rootfs.backend = ${rootfsback}" > ${conf}
+}
+
+debugit()
+{
+	printf '=====> More in-depth debug, if possible? [yes/(no)]: '
+	read -r debug
+	case ${debug:='n'} in
+		'yes'|'YES'|'y'|'Y')
+			l=${l:="-l TRACE"}
+			printf "Will output to ${o}"
+			set -x
+			return 0
+		;;
+		'no'|'NO'|'n'|'N')
+			l=${l:="-l ERROR"}
+			return 0
+		;;
+		*)
+			printf "=====> Enter yes or no. "
+			return 1
+		;;
+	esac
+}
+
+attachit()
+{
+	printf '\n=====> Enter container via attach? [yes/(no)]: '
+	read -r attach
+	case ${attach:='n'} in
+		'yes'|'YES'|'y'|'Y')
+			lxc-attach ${n}
+			return 0
+		;;
+		'no'|'NO'|'n'|'N')
+			printf '=====> boooooy\n'
+			return 0
+		;;
+		*)
+			printf "=====> Enter yes or no. "
+			return 1
+		;;
+	esac
+}
+
+startit()
+{
+	printf '\n=====> Start container? [(yes)/no]: '
+	read -r start
+	case ${start:='y'} in
+		'yes'|'YES'|'y'|'Y')
+			printf "=====> Starting ${hostname} container... "
+			lxc-start ${n}
+			return 0
+		;;
+		'no'|'NO'|'n'|'N')
+			printf '=====> you got it, bucko\n'
+			return 0
+		;;
+		*)
+			printf "=====> Enter yes or no. "
+			return 1
+		;;
+	esac
+}
+
+cleanit()
+{
+if [ "${hostname}" = 'test' ];
+	then
+		printf "=====> \"test\" was found in name; cleanup? [(yes)/no]: "
+		read -r undotest
+		case ${undotest:='y'} in
+			'yes'|'YES'|'y'|'Y')				
+				printf "=====> Cleaning up ${hostname}\n=====>"
+				lxc-stop ${n}
+				lxc-destroy ${n}
+				printf "=====> "
+				rm -f ${conflnk}
+				rc-update del ${rc}
+				rm -f ${init}
+				rm -f ${contd}
+				printf '=====> Clean up finished.\n\n'
+				return 0
+			;;
+			'no'|'NO'|'n'|'N')
+				printf '=====> aight\n\n'
+				return 0
+			;;
+			*)
+				printf '=====> Enter yes or no. \n'
+				return 1
+			;;
+		esac;
+	else
+		return 0;
+fi
+}
+
+changefiles()
+{
+	mkdir -p ${lxc_network} ${lxc_ssh}
+	cp -R ${host_ssh}/ssh_config ${lxc_ssh}/ssh_config
+	cp -R ${host_ssh}/sshd_config ${lxc_ssh}/sshd_config
+	touch ${lxc_hostname}	
+	touch ${lxc_hosts}	
+
+	printf %s "127.0.0.1	${hostname}.my.domain ${hostname} localhost.localdomain localhost" > ${lxc_hosts}
+	printf %s "${hostname}" > ${lxc_hostname}
+	rm -rf "${lxc_interfaces}*"
+printf %s 'auto eth0
+iface eth0 inet dhcp
+hostname $(hostname)' > ${lxc_interfaces}
+}
+
+makeit()
+{
+	printf "\n=====> Creating the container ${hostname} of OS ${OS}... \n"
+	preinst
+	output=$(${lxccreate} 2>&1)
+	if [ "$output" = "$e318" ];
+		then
+			printf "=(!)=> The absolute most generic error happened:"
+			printf "=(!)=> $output"
+			exit;
+	elif [ "$output" = "$exists" ];
+		then
+			printf "=(!)=> Container ${hostname} exists at ${contd}";
+	
+		else
+			printf "=(!)=> $output";
+	fi
+
+	#case $output in
+	#	"$e318")
+	#		printf "=(!)=> The absolute most generic error happened: "
+	#	;;
+	#	"$exists")
+	#		printf "=(!)=> Container ${hostname} exists at ${contd}"
+	#	;;
+	#	*)
+	#		printf "=(!)=> holla"
+	#	;;		
+	#esac
+	printf '\n\n#########################################################\n\n'
+	postinst
+}
+
+# Putting these if statements in functions for the sake of readability and my sanity, even
+# thought i didn't need to make them if statements in the first place
+preinst()
+{
+
+	#check host filesystem existence 
+	if [ -d ${hostfs} ];
+	        then : ;
+	        else
+			printf '=====> Hostfs... \n' 
+			mkdir -p ${hostfs};
+	fi
+
+	#check container filesystem existence
+	if [ -e ${conf} ];
+	        then : ;
+	        else
+			printf '=====> Clientfs... \n'
+			mkdir -p ${contfs}
+			mkdir -p ${workd}
+			touch ${conf};
+	fi
+	makeconf
+}
+
+postinst()
+{
+	# check init files existence 
+	if [ -e ${init} ];
+		then : ;
+		else
+			printf '=====> Creating startup stuff... \n'
+			ln -s lxc ${init};
+			printf "=====> lxc linked to lxc.${hostname} in /etc/init.d\n"
+			printf '=====>'
+			rc-update add ${rc};
+	fi
+
+	# check/create symlink to the conf file
+	if [ -e ${conflnk} ];
+		then : ;
+		else
+			ln -s ${conf} ${conflnk};
+			printf "=====> did something kinda dumb to make things easier; ${conflnk} exists.\n";
+	fi
+	
+	if [ "$rootfsback" = 'overlayfs' ];
+		then
+			printf "=====> Changing some host-specific stuff... "
+			changefiles;
+	fi
+	
+	#ask to start the container#
+	until startit; do : ; done
+
+	# ask if lxc-attach should be run
+	until attachit; do : ; done
+
+	# ask if clean should be run
+	until cleanit; do : ; done
+
+}
+
+
+####################################################################
+####################################################################
+
+printf '\n#########################################################\n'
+printf '###################Container Creator#####################'
+printf '\n#########################################################\n\n'
+
+intake
+
+printf '\n#########################################################\n'
+
+makeit
+
+printf '#########################################################\n\n'
+printf '=====> Done\n\n'
+printf '#########################################################\n\n'
