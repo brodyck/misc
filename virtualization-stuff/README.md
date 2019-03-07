@@ -1,10 +1,12 @@
-Spoiler alert: Nvidia actively writes their drivers to detect when someone uses GPU passthrough on a non-workstation card. This whole process works simply with a Linux guest.
+My laptop can do GPU passthrough, but it's a matter of figuring out how to get there with a Windows guest. Goal is to delete Windows.
 
-My laptop can do GPU passthrough, but it's a matter of figuring out the configuration or code needed to change to get it to work.
+Nvidia actively writes their drivers to detect when you try GPU passthrough on a non-workstation card **on Windows.** This whole process works simply with a Linux guest. So simply.
 
 These are a few test configs I've saved, and some little shortcuts I've made.
 
-Goal is to delete windows. I'd love to figure this out, but I've gotta get other stuff done.
+---
+
+My laptop doesn't match the configurations specified in the articles below, so I can't follow any guides. It takes a lot of time to test these things. I haven't finished yet.
 
 Here's a github gist with documentation of GPU passthrough for gaming:
 https://gist.github.com/Misairu-G/616f7b2756c488148b7309addc940b28
