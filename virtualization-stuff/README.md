@@ -1,3 +1,5 @@
+Spoiler alert: Nvidia actively writes their drivers to detect when someone uses GPU passthrough on a non-workstation card. This whole process works simply with a Linux guest.
+
 My laptop can do GPU passthrough, but it's a matter of figuring out the configuration or code needed to change to get it to work.
 
 These are a few test configs I've saved, and some little shortcuts I've made.
