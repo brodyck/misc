@@ -1,2 +1,2 @@
-bash /home/brody/nv-bind
+bash ./nv-bind
 tee /proc/acpi/bbswitch <<<ON

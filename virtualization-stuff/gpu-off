@@ -1,2 +1,2 @@
-bash /home/brody/nv-unbind
+bash ./nv-unbind
 tee /proc/acpi/bbswitch <<<OFF

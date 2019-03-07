@@ -1,5 +1,5 @@
-
-1;4804;0c#! /bin/bash
+#! /bin/bash
+# This is for installing the intel gvt-d/g drivers that work with my 7700hq
 set -x
 mkdir $1
 tar xf $1.tar_1.bz2 -C $1
