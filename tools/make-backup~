@@ -1,0 +1,18 @@
+#!/bin/bash
+backName="$HOSTNAME-$(date +d%d-%b-y%Y-h%H)"
+if ! mount | grep "Files-fasp";
+then
+    ./mount-fasp
+fi
+backDir=/home/brody/storage/backups/${backName}
+mkdir -p ${backDir}
+chown brody:brody ${backDir}
+chmod 777 ${backDir}
+sudo rsync -aAHlXvquKxzP --exclude=Files-fasp --exclude=storage --exclude=raid0 /home ${backDir}/home
+sudo rsync -aAHlXvquKxzP /etc ${backDir}/etc
+sudo rsync -aAHlXvquKxzP /root ${backDir}/root
+sudo rsync -aAHlXvquKxzP /boot ${backDir}/boot
+#mkdir -p ${backDir}/var/backups && sudo rsync -aAHlXvquKxzP /var/backups ${backDir}/var/backups
+#mkdir -p ${backDir}/var/log && sudo rsync -aAHlXvquKxzP /var/log ${backDir}/var/log
+
+

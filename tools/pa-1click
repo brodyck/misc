@@ -38,7 +38,7 @@ volume(){
 	then
 	    amixer -D pulse set Master 50%
 	else
-	    amixer -D pulse set Master 6%5
+	    amixer -D pulse set Master 65%
 	fi
     fi
 }
@@ -47,6 +47,7 @@ set -x
 spdsay=$(spd-say -r -100 -i 100 "pooooop")
 listsinks=$($spdsay && pactl list short sinks)
 greprun=$(echo "$listsinks" | grep -v RUNNING)
+
 # This finds the currently NOT-running sink:
 running_sink=$(spd-say -i -100 "boopis lal" && pactl list short sinks | grep -v RUNNING | grep -oE '^[0-9]+')
 
