@@ -18,8 +18,8 @@ user=brody
 home=/home/brody
 storageMount="/home/brody/storage"
 raid0Mount="/home/brody/raid0"
-storageUrl='//192.168.2.40/storage/' 
-raid0Url='//192.168.2.40/raid0/'
+storageUrl='//192.168.2.60/storage/' 
+raid0Url='//192.168.2.60/raid0/'
 homeOpts=" -o user=brody,pass=dyck,dom=SWOMP,uid=${user},vers=2.1"
 uid="uid=$(id -u brody)"
 gid="gid=$(id -g brody)"

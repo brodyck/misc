@@ -1,6 +1,6 @@
 #! /bin/bash
 #ssh root@192.168.2.40 -p 22 -i /home/brody/.ssh/id_ed25519-bidaya -vvv
-bidaya=192.168.2.40
+bidaya=192.168.2.60
 key="/home/brody/.ssh/id_ed25519-brody"
 if hostname -I | grep -q "192.168.2.*"
 then

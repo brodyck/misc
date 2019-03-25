@@ -9,8 +9,8 @@ uid="uid=$(id -u brody)"
 gid="gid=$(id -g brody)"
 fileMask="umask=002" #umask
 ntfsOps="-o noatime,suid,exec,${uid},${gid},${fileMask},rw,permissions"
-storageUrl='//192.168.2.40/storage/' 
-raid0Url='//192.168.2.40/raid0/' 
+storageUrl='//192.168.2.60/storage/' 
+raid0Url='//192.168.2.60/raid0/' 
 mountStorage="mount -t cifs -o user=brody,pass=dyck,dom=SWOMP,uid=${user},vers=3.0 ${filesUrl}"
 Storage=${home}/storage
 mountRaid0="mount -t cifs -o user=brody,pass=dyck,dom=SWOMP,uid=${user},vers=3.0 ${raid1Url}"
