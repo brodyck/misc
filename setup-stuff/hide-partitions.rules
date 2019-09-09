@@ -1,5 +1,5 @@
 ACTION!="add|change", GOTO="hide_partition_end"
 SUBSYSTEM!="block", GOTO="hide_partition_end"
 KERNEL=="loop*|ram*", GOTO="hide_partition_end"
-KERNEL=="nvme0n1p7", ENV{UDISKS_IGNORE}="True"
+KERNEL=="sda7", ENV{UDISKS_IGNORE}="True"
 LABEL="hide_partition_end"

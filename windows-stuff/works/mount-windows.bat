@@ -7,7 +7,8 @@ REM get-winevent -providername Microsoft-Windows-Kernel-Power | foreach-object {
 REM mountvol %drive% %volume%
 
 set drive=e:
-set volume=\\?\Volume{fa74b314-bf8e-4453-9695-07631f7fc822}\
+set volume=\\?\Volume{054e0ddf-2d57-48a1-8b04-70ca2fdd58ca}\
+
 
 if exist %drive% (
 

@@ -1,3 +1,0 @@
-xfreerdp /v:192.168.122.101:3389 "/u:swompson" "/p:poo" /w:1600 /h:900 /bpp:32 +clipboard +fonts /gdi:hw /rfx /rfx-mode:video /sound:sys:pulse 
-xfreerdp /v:192.168.122.157:3389 "/u:swompson" "/p:poo" /w:1600 /h:900 /bpp:32 +clipboard +fonts /gdi:hw /rfx /rfx-mode:video /sound:sys:pulse 
-xfreerdp /v:192.168.2.219:3389	 "/u:swompson" "/p:"  	/w:1600 /h:900 /bpp:32 +clipboard +fonts /gdi:hw /rfx /rfx-mode:video /sound:sys:pulse +menu-anims +window-drag

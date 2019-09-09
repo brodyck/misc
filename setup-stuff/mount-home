@@ -26,14 +26,13 @@ gid="gid=$(id -g brody)"
 fileMask="umask=002" #umask
 # mount -t ntfs-3g -o users,suid,exec,permissions,user_id=1000,group_id=1000,umask=0 /dev/sda7 
 ntfsOps="-o noatime,suid,exec,${uid},${gid},${fileMask},rw,permissions"
-storagePartition="/dev/nvme0n1p7"
 start(){
     log_begin_msg "Mounting things..."
-    if lsblk | grep ${storagePartition} ; then
+    if lsblk | grep sda7 ; then
 	mntDest=/home/brody/
 	mntStart=/mnt/home/
         mownt="mount -l --bind ${mntStart}"
-        mount -t ntfs-3g ${ntfsOps} ${storagePartition} $mntStart
+        mount -t ntfs-3g ${ntfsOps} /dev/sda7 $mntStart
 #       mount -t ntfs-3g LABEL=windows /mnt/windows
         ${mownt}Desktop ${mntDest}Desktop
         ${mownt}Documents ${mntDest}Documents

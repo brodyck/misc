@@ -1,1 +1,0 @@
-pip3 install --user rope jedi flake8 autopep8 yapf

@@ -1,3 +1,0 @@
-emacs /etc/dhcp/dhclient.conf
-
-remove 'dhcp.domainname.servers'

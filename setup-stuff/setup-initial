@@ -1,8 +1,5 @@
 #! /bin/bash
 set -x
-# Discord font issues
-# https://github.com/snapcrafters/discord/issues/35
-# https://github.com/wireapp/wire-desktop/issues/622#issuecomment-300101249
 user="brody"
 netShareEnable=0
 home="/home/${user}"
@@ -60,7 +57,7 @@ bootScript(){
 
 grubUpdate(){
     cp ${localSetupDir}/grub.default /etc/default/grub
-    update-grub
+    grub-update
 }
 
 #Getting some info
@@ -143,7 +140,7 @@ kernUpdate(){
     fi
     apt update -y
     apt install ukuu -y
-    ukuu --install-latest --yes
+    ukuu --install-point --yes
 }
 
 instSoftware(){
@@ -174,15 +171,17 @@ instSoftware(){
 			  python3 \
 			  samba \
 			  cifs-utils \
+			  unrar \
 			  gparted \
 			  adb \
 			  python3-selenium \
 			  emacs26 \
-			  gnome-disk-utility \
+			  gnome-disks \
 			  transmission \
 			  unrar \
 			  rar \
-			  lzma \
+			  7z \
+			  xbindkeys \
 			  unzip \
 			  wireshark \
 			  freerdp2-x11 \
@@ -190,19 +189,8 @@ instSoftware(){
 			  linphone \
 			  peek \
 			  texlive-latex-base \
-			  texlive-latex-extra \
-			  font-emojione \
-			  steam \
-			  dconf-editor \
-			  arp-scan \
-			  systool \
-			  sysfsutil \
-			  
-			  
-    
-
-	# must run fc-cache -f afterwards
-			&& wait
+			  texlive-latex-extras
+	&& wait
 #steam \
 #rambox \
 #synergy \
@@ -217,12 +205,11 @@ instSoftware(){
 }
 
 makeDirs && ownEverything
-#instRepo
+instRepo
 instSoftware
 bootScript
 kernUpdate
 grubUpdate
-fc-cache -f
 exit
 
 keybase(){

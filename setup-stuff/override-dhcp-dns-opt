@@ -1,3 +1,0 @@
-emacs /etc/dhcp/dhclient.conf
-
-remove 'dhcp.name-servers' + 'dhcp6.name-servers'
