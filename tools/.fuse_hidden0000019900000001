@@ -1,0 +1,14 @@
+#! /bin/bash
+#ssh root@192.168.2.40 -p 22 -i /home/brody/.ssh/id_ed25519-bidaya -vvv
+#if ping -c 1 -W 1 ${bidaya} | grep -qc -c "1 received"
+#set -x
+bidaya="192.168.2.60"
+key="/home/brody/.ssh/id_ed25519-brody"
+if hostname -I | grep -qE "192\.168\.2\."
+then
+    ssh brody@${bidaya} -p 22 -i ${key}
+    exit
+else
+    ssh brody@funnyafricashirt.party -p 22223 -i ${key}
+    exit
+fi
