@@ -8,15 +8,15 @@ audio_in=1
 
 if pactl list short | grep -e "module-loopback";
 then
-    amixer -D pulse set Capture 0%
+    amixer -D pulse set Capture 0% # previous input
     pactl unload-module module-loopback
-    amixer -D pulse set Capture 0%
+    amixer -D pulse set Capture 100% # new input
 else
     # I have the volume settings change before and after to avoid bursts of loud audio if the volume gets changed manually/faster than output change
-    amixer -D pulse set Capture 0%
+    amixer -D pulse set Capture 0% # previous input
     amixer -D pulse set Master 50%
     pactl load-module module-loopback source=1 sink=${running_sink}
-    amixer -D pulse set Capture 0%
+    amixer -D pulse set Capture 20% # new input
     amixer -D pulse set Master 50%
 fi
 

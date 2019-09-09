@@ -1,0 +1,12 @@
+#! /bin/bash
+
+path=${1}
+
+photos=( $(ls "${path}" | grep -e "**.HEIC") )
+
+for photo in "${photos[@]}"
+do
+    /usr/bin/heif-convert "${path}${photo}" "./${photo%.HEIC}.jpg"
+done
+
+echo "Done!"

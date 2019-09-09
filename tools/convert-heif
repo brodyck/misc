@@ -1,0 +1,12 @@
+#! /bin/env python
+from os import walk
+import subprocess
+pathInput = input("Your path: ")
+while
+f = []
+for (dirpath, dirnames, filenames) in walk():
+    f.extend(filenames)
+    break
+
+subprocess.run("/usr/bin/heif-convert", )
+
