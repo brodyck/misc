@@ -1,0 +1,9 @@
+#! /bin/bash
+
+photos=( $(ls "/home/brody/storage/pictures/important/sham/montreal-2019" | grep -e "**.HEIC") )
+
+for photo in ${photos[@]}
+do
+
+
+
